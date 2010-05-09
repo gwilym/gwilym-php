@@ -1,0 +1,2 @@
+this dir can hold local overrides class overrides (see the loading order setup by bootstrap)
+will probably also be used for server/instance-specific configs (I've yet to decide where / how to store "config"-like data)
