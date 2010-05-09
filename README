@@ -1,0 +1,1 @@
+these files still have hard-coded references to my web server testing sub-dir "/mongodm/" so make sure to remove / change them before using
