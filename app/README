@@ -1,0 +1,2 @@
+app files go here, usually under /app/Controller and /app/View
+or change the bootstrap to point to a different codebase
