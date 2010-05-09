@@ -33,8 +33,5 @@ class Gwilym_Autoloader
 	public static function init ()
 	{
 		Gwilym_Autoloader::register();
-		Gwilym_Autoloader::addPath(GWILYM_APP_DIR);
-		Gwilym_Autoloader::addPath(GWILYM_LOCAL_DIR);
-		Gwilym_Autoloader::addPath(GWILYM_LIB_DIR);
 	}
 }
