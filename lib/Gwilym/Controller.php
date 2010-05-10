@@ -19,18 +19,37 @@ abstract class Gwilym_Controller
 	*/
 	protected $_response;
 
+	/**
+	* To be defined by child classes implementing a croller.
+	*
+	* @param array $args arguments as provided by uri -> router pattern processing
+	*/
 	abstract public function action ($args);
 
+	/**
+	* @param Gwilym_Request $request
+	* @return Gwilym_Controller
+	*/
 	public function __construct (Gwilym_Request $request)
 	{
 		$this->_request = $request;
 	}
 
+	/**
+	* The request object which is invoking this controller.
+	*
+	* @return Gwilym_Request
+	*/
 	public function request ()
 	{
 		return $this->_request;
 	}
 
+	/**
+	* Response object for directly controlling output to the user-agent
+	*
+	* @return Gwilym_Response
+	*/
 	public function response ()
 	{
 		return $this->_response;
@@ -52,8 +71,8 @@ abstract class Gwilym_Controller
 		{
 			$this->_view = str_replace('_', '/', str_replace('^Controller_', '', '^' . get_class($this)));
 
-			//$this->view .= '.php';
-			//$this->view = new Gwilym_View_Php($this->view);
+//			$this->_view .= '.php';
+//			$this->_view = new Gwilym_View_Php($this->_view);
 
 			$this->_view .= '.tpl';
 			$this->_view = new Gwilym_View_Twig($this->_view);
