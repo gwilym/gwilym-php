@@ -1,6 +1,6 @@
 <?php
 
-require_once(dirname(dirname(__FILE__)) . '/init.php');
+require_once(dirname(dirname(__FILE__)) . '/bootstrap.php');
 
 error_reporting(E_ALL ^ E_DEPRECATED);
 

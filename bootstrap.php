@@ -16,7 +16,3 @@ Gwilym_Autoloader::init();
 Gwilym_Autoloader::addPath(GWILYM_LOCAL_DIR);
 Gwilym_Autoloader::addPath(GWILYM_APP_DIR);
 Gwilym_Autoloader::addPath(GWILYM_LIB_DIR);
-
-$request = new Gwilym_Request;
-$request->addRouter(new Gwilym_Router_Standard_Reverse);
-$request->handle();
