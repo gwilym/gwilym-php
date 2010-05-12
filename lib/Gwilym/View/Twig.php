@@ -3,21 +3,21 @@
 class Gwilym_View_Twig extends Gwilym_View
 {
 	protected $_file;
-
+	protected $_paths;
 	protected $_loader;
 	protected $_environment;
 	protected $_template;
 
-	public function __construct ($file)
+	public function __construct ($file, $paths = array())
 	{
-		$this->_file = $file;
-	}
+		if (!count($paths)) {
+			$paths[] = GWILYM_APP_DIR . '/View/';
+		}
 
-	protected function _preRender ()
-	{
-		$this->_loader = new Twig_Loader_Filesystem(array(
-			GWILYM_APP_DIR . '/View/',
-		));
+		$this->_paths = $paths;
+		$this->_file = $file;
+
+		$this->_loader = new Twig_Loader_Filesystem($this->_paths);
 
 		$this->_environment = new Twig_Environment($this->_loader, array(
 			'trim_blocks' => true,
@@ -26,7 +26,10 @@ class Gwilym_View_Twig extends Gwilym_View
 		));
 
 		$this->_environment->addExtension(new Twig_Extension_Escaper);
+	}
 
+	protected function _preRender ()
+	{
 		$this->_template = $this->_environment->loadTemplate($this->_file);
 	}
 
