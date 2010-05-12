@@ -2,40 +2,43 @@
 
 class Gwilym_View_Twig extends Gwilym_View
 {
-	protected $_template;
-	protected $_twigLoader;
-	protected $_twigEnvironment;
-	protected $_twigTemplate;
+	protected $_file;
 
-	public function __construct ($template)
+	protected $_loader;
+	protected $_environment;
+	protected $_template;
+
+	public function __construct ($file)
 	{
-		$this->_template = $template;
+		$this->_file = $file;
 	}
 
 	protected function _preRender ()
 	{
-		$this->_twigLoader = new Twig_Loader_Filesystem(array(
+		$this->_loader = new Twig_Loader_Filesystem(array(
 			GWILYM_APP_DIR . '/View/',
 		));
 
-		$this->_twigEnvironment = new Twig_Environment($this->_twigLoader, array(
+		$this->_environment = new Twig_Environment($this->_loader, array(
 			'trim_blocks' => true,
 			'cache' => GWILYM_CACHE_DIR . '/twig/view/',
 			'auto_reload' => true,
 		));
 
-		$this->_twigTemplate = $this->_twigEnvironment->loadTemplate($this->_template);
+		$this->_environment->addExtension(new Twig_Extension_Escaper);
+
+		$this->_template = $this->_environment->loadTemplate($this->_file);
 	}
 
 	public function display ()
 	{
 		$this->_preRender();
-		$this->_twigTemplate->display($this->data);
+		$this->_template->display($this->data);
 	}
 
 	public function render ()
 	{
 		$this->_preRender();
-		$this->_twigTemplate->render($this->data);
+		$this->_template->render($this->data);
 	}
 }
