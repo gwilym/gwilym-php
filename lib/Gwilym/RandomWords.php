@@ -22,7 +22,7 @@ class Gwilym_RandomWords
 
 		foreach ($files as $file)
 		{
-			$handle = fopen(__DIR__ . '/' . $file, 'r');
+			$handle = fopen(dirname(__FILE__) . '/' . $file, 'r');
 			while ($line = fgets($handle))
 			{
 				$line = trim($line);
