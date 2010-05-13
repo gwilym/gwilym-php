@@ -11,32 +11,32 @@ class Gwilym_Request
 
 	protected $_routers = array();
 
-	protected $_uri = array();
-
-	protected $_base = '/mongodm';
+	protected $_uriParser;
 
 	public function __construct ($uri = null)
 	{
-		// hack: can you discover /mongodm/ is a sub-dir based off path of index.php vs. a doc-root setting somewhere?
-		if ($uri === null)
-		{
-			// hack: stuffs up requests to ie. /blah/mongodm/
-			$this->_uri = str_replace($this->_base, '', $_SERVER['REQUEST_URI']);
-		}
-		else
+		if ($uri !== null)
 		{
 			$this->_uri = $uri;
 		}
 	}
 
-	public function base ()
+	public function uriParser (Gwilym_UriParser $uriParser = null)
 	{
-		return $this->_base;
+		if ($uriParser !== null)
+		{
+			$this->_uriParser = $uriParser;
+		}
+		else if ($this->_uriParser === null)
+		{
+			$this->_uriParser = new Gwilym_UriParser_Guess;
+		}
+		return $this->_uriParser;
 	}
 
 	public function uri ()
 	{
-		return $this->_uri;
+		return $this->uriParser()->uri();
 	}
 
 	/**

@@ -1,5 +1,8 @@
 <?php
 
+// this file should always be at the root of your site(s) structure(s)
+// its file system location will be used to determine if it is running at the doc-root level, or in a sub-directory, no matter what the URI is
+
 define('GWILYM_START_TIME', microtime(true));
 
 define('GWILYM_BASE_DIR', dirname(__FILE__));
