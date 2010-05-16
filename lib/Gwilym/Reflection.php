@@ -10,4 +10,13 @@ class Gwilym_Reflection
 		$reflect = new ReflectionClass($className);
 		return $reflect->isInstantiable();
 	}
+
+	public static function isClosure ($obj)
+	{
+		if (is_object($obj) && class_exists('Closure') && $obj instanceof Closure)
+		{
+			return true;
+		}
+		return false;
+	}
 }
