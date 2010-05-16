@@ -1,7 +1,9 @@
 <?php
 
-abstract class Gwilym_Event
+class Gwilym_Event
 {
+	protected static $_enableTriggers = false;
+
 	protected static $_bindingsLoaded = array();
 
 	protected static $_bindings = array();
@@ -97,6 +99,37 @@ abstract class Gwilym_Event
 		throw new Exception('Not yet implemented');
 	}
 
+	public static function trigger ($event)
+	{
+		$event = new Gwilym_Event($event);
+		if (!self::$_enableTriggers)
+		{
+			return $event;
+		}
+
+		$bindings = self::bindings($event->id());
+
+		$args = func_get_args();
+		$args[0] = $event;
+
+		foreach ($bindings as $binding)
+		{
+			if (!is_callable($binding))
+			{
+				throw new Gwilym_Event_Exception_BindingNotCallable();
+			}
+
+			call_user_func_array($binding, $args);
+
+			if ($event->propagationStopped())
+			{
+				break;
+			}
+		}
+
+		return $event;
+	}
+
 	/** @var string */
 	protected $_id;
 
@@ -104,43 +137,36 @@ abstract class Gwilym_Event
 	protected $_preventDefault = false;
 
 	/** @var bool */
-	protected $_stopPropogation = false;
+	protected $_stopPropagation = false;
+
+	public function __construct ($id)
+	{
+		$this->_id = $id;
+	}
 
 	/** @return string */
 	public function id ()
 	{
-		if ($this->_id === null)
-		{
-			$this->_id = get_class($this);
-		}
-
 		return $this->_id;
 	}
 
-	/** @return Gwilym_Event */
-	public function trigger ($data = null)
+	public function defaultPrevented ()
 	{
-		$bindings = self::bindings($this->id());
-		foreach ($bindings as $binding)
-		{
-			if (Gwilym_Reflection::isClosure($binding))
-			{
-				$binding($this, $data);
-			}
-			else
-			{
-				if (!is_callable($binding))
-				{
-					throw new Gwilym_Event_Exception_BindingNotCallable();
-				}
-				call_user_func($binding, $data);
-			}
+		return $this->_preventDefault;
+	}
 
-			if ($this->_stopPropogation)
-			{
-				break;
-			}
-		}
-		return $this;
+	public function preventDefault ()
+	{
+		$this->_preventDefault = true;
+	}
+
+	public function propagationStopped ()
+	{
+		return $this->_stopPropagation;
+	}
+
+	public function stopPropagation ()
+	{
+		$this->_stopPropagation = true;
 	}
 }

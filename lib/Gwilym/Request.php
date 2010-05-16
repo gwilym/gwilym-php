@@ -54,10 +54,7 @@ class Gwilym_Request
 
 	public function handle ()
 	{
-		$event = new Gwilym_Request_Event_PreHandle();
-		$event->request = $this;
-		$event->trigger();
-		unset($event);
+		Gwilym_Event::trigger('Gwilym_Request_PreHandle', $this);
 
 		if (!self::$_nestingDepth--)
 		{
@@ -78,10 +75,7 @@ class Gwilym_Request
 			// this exception is thrown by the transfer() method after a transfer, forcing a jump out of all other code paths at the point of call to ->transfer()
 		}
 
-		$event = new Gwilym_Request_Event_PostHandle();
-		$event->request = $this;
-		$event->trigger();
-		unset($event);
+		Gwilym_Event::trigger('Gwilym_Request_PostHandle', $this);
 	}
 
 	/**

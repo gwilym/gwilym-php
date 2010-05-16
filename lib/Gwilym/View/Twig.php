@@ -31,10 +31,7 @@ class Gwilym_View_Twig extends Gwilym_View
 	protected function _preRender ()
 	{
 		$this->_template = $this->_environment->loadTemplate($this->_file);
-
-		$event = new Gwilym_View_Event_PreRender();
-		$event->view = $this;
-		$event->trigger();
+		Gwilym_Event::trigger('Gwilym_View_PreRender', $this);
 	}
 
 	public function display ()
