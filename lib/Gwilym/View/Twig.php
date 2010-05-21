@@ -10,7 +10,7 @@ class Gwilym_View_Twig extends Gwilym_View
 
 	public function __construct ($file, $paths = array())
 	{
-		if (!count($paths)) {
+		if (empty($paths)) {
 			$paths[] = GWILYM_APP_DIR . '/View/';
 		}
 

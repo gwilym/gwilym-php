@@ -72,7 +72,7 @@ class Gwilym_Router_Standard_Reverse extends Gwilym_Router_Standard
 			array_walk($controllers, array('Gwilym_Router_Standard', 'walkUri'));
 
 			$found = false;
-			while (count($uri))
+			while (!empty($uri))
 			{
 				$controller = 'Controller_' . implode('_', $controllers) . '_Index';
 				if (class_exists($controller) && Gwilym_Reflection::isClassInstanciable($controller))
