@@ -11,6 +11,7 @@ Gwilym_Autoloader::addPath(dirname(__FILE__));
 class AllTests extends TestSuite {
 	function AllTests() {
 		$this->TestSuite('All tests');
-		$this->addTestClass('Tests_Gwilym_Router_Standard_Reverse');
+		$this->addTestClass('Tests_Gwilym_Event');
+		//$this->addTestClass('Tests_Gwilym_Router_Standard_Reverse');
 	}
 }
