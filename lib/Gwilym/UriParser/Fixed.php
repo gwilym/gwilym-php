@@ -6,7 +6,7 @@ class Gwilym_UriParser_Fixed extends Gwilym_UriParser
 	protected $_docroot;
 	protected $_uri;
 
-	public function __construct ($base, $uri, $docroot)
+	public function __construct ($base, $uri = null, $docroot = null)
 	{
 		$this->_base = $base;
 		$this->_uri = $uri;
