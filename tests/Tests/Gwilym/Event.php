@@ -2,11 +2,10 @@
 
 class Gwilym_Event_Test extends Gwilym_Event
 {
-	/** flushes all in-memory bindings for testing purposes */
+	/** for testing, a public accessor for _flushBindings */
 	public function flushBindings ()
 	{
-		self::$_bindings = array();
-		self::$_loaded = array();
+		self::_flushBindings();
 	}
 }
 
@@ -82,34 +81,51 @@ class Tests_Gwilym_Event extends UnitTestCase
 		$this->assertEqual(1, $event->data);
 	}
 
-	public function testBindToStaticMethod ()
+	public function testBindToStaticMethodAndUnbind ()
 	{
 		$id = $this->generateRandomEventId();
 		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodCallback'));
 		$event = Gwilym_Event::trigger($id, 1);
 		$this->assertEqual(2, $event->data);
+		Gwilym_Event::unbind($id, array(__CLASS__, 'staticMethodCallback'));
+		$event = Gwilym_Event::trigger($id, 1);
+		$this->assertEqual(1, $event->data);
 	}
 
-	public function testPersistentBindToStaticMethod ()
+	public function testPersistentBindToStaticMethodAndUnbind ()
 	{
-		$this->skip();
+		$id = $this->generateRandomEventId();
+		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodCallback'), true);
+		Gwilym_Event_Test::flushBindings();
+		$event = Gwilym_Event::trigger($id, 1);
+		$this->assertEqual(2, $event->data);
+		Gwilym_Event::unbind($id, array(__CLASS__, 'staticMethodCallback'));
+		$event = Gwilym_Event::trigger($id, 1);
+		$this->assertEqual(1, $event->data);
 	}
 
-	public function testBindToInstanceMethod ()
+	public function testBindToInstanceMethodAndUnbind ()
 	{
 		$id = $this->generateRandomEventId();
 		Gwilym_Event::bind($id, array($this, 'instanceMethodCallback'));
 		$event = Gwilym_Event::trigger($id, 1);
 		$this->assertEqual(2, $event->data);
+		Gwilym_Event::unbind($id, array($this, 'instanceMethodCallback'));
+		$event = Gwilym_Event::trigger($id, 1);
+		$this->assertEqual(1, $event->data);
 	}
 
-	public function testBindToClosure ()
+	public function testBindToClosureAndUnbind ()
 	{
 		$id = $this->generateRandomEventId();
-		Gwilym_Event::bind($id, function($event){
+		$closure = function($event){
 			$event->data++;
-		});
-		$event = Gwilym_Event::trigger($id, 0);
+		};
+		Gwilym_Event::bind($id, $closure);
+		$event = Gwilym_Event::trigger($id, 1);
+		$this->assertEqual(2, $event->data);
+		Gwilym_Event::unbind($id, $closure);
+		$event = Gwilym_Event::trigger($id, 1);
 		$this->assertEqual(1, $event->data);
 	}
 

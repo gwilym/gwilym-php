@@ -12,12 +12,23 @@ class Gwilym_Event
 	/**
 	* storage for whether an event has had persistent bindings loaded yet, in the format of event_id => bool
 	*
-	* @var mixed
+	* @var array<bool>
 	*/
 	protected static $_loaded = array();
 
 	/**
-	* load any persisted bindings for a specific event
+	* flushes all in-memory bindings, but does not affect persisted bindings - generally used for tests only to clear memory and force a load from persisted bindings
+	*
+	* @return void
+	*/
+	protected static function _flushBindings ()
+	{
+		self::$_bindings = array();
+		self::$_loaded = array();
+	}
+
+	/**
+	* load any persisted bindings for a specific event, calling this on the same event name several times will only load once
 	*
 	* @param string $event
 	* @return void
@@ -44,15 +55,20 @@ class Gwilym_Event
 				self::$_bindings[$event][] = array($binding[0], $binding[1]);
 			}
 		}
+
+		self::$_loaded[$event] = true;
 	}
 
 	/**
-	* bind a callback to an event
+	* bind a callback to an event with optional persistence between page loads
 	*
 	* @param object $object optional, the event can be object specific - binding to a specific object implies $persist = false as internal object ids are not unique between page loads
 	* @param string $event event name
-	* @param callback $callback callback, which can be a closure, an array(class, static method) or a function name - binding a closure implies $persist = false as closures cannot be serialized
+	* @param callback $callback callback, which can be a closure, an array(class, public static method), an array(object, public method), or a function name - binding a closure implies $persist = false as closures cannot be serialized
 	* @param bool $persist optional, if true the binding will persist beyond this script execution (default false)
+	* @throws Gwilym_Event_Exception_CannotPersistClosureBinding if an attempt is made to persist a closure as a callback
+	* @throws Gwilym_Event_Exception_CannotPersistInstanceEvent if an attempt is made to persist a binding to an instance-specific event
+	* @throws Gwilym_Event_Exception_CannotPersistInstanceBinding if an attempt is made to persist an instance-specific binding
 	*/
 	public static function bind ($object, $event, $callback = null, $persist = null)
 	{
@@ -149,7 +165,7 @@ class Gwilym_Event
 	}
 
 	/**
-	* trigger an event, propagating the trigger to all bound callbacks
+	* trigger an event
 	*
 	* @param object $object optional
 	* @param string $event
