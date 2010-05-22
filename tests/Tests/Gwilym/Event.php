@@ -1,5 +1,15 @@
 <?php
 
+class Gwilym_Event_Test extends Gwilym_Event
+{
+	/** flushes all in-memory bindings for testing purposes */
+	public function flushBindings ()
+	{
+		self::$_bindings = array();
+		self::$_loaded = array();
+	}
+}
+
 function test_gwilym_event_function_callback (Gwilym_Event $event)
 {
 	$event->data++;
@@ -7,10 +17,15 @@ function test_gwilym_event_function_callback (Gwilym_Event $event)
 
 class Tests_Gwilym_Event extends UnitTestCase
 {
+	public function setUp ()
+	{
+		Gwilym_Event_Test::flushBindings();
+	}
+
 	protected function generateRandomEventId ()
 	{
 		// 'random'
-		return md5(uniqid('', true));
+		return 'test' . md5(uniqid('', true));
 	}
 
 	public static function staticMethodPreventsDefault (Gwilym_Event $event)
@@ -44,17 +59,27 @@ class Tests_Gwilym_Event extends UnitTestCase
 	}
 
 
-	public function testBindToFunction ()
+	public function testBindToFunctionAndUnbind ()
 	{
 		$id = $this->generateRandomEventId();
 		Gwilym_Event::bind($id, 'test_gwilym_event_function_callback');
 		$event = Gwilym_Event::trigger($id, 1);
 		$this->assertEqual(2, $event->data);
+		Gwilym_Event::unbind($id, 'test_gwilym_event_function_callback');
+		$event = Gwilym_Event::trigger($id, 1);
+		$this->assertEqual(1, $event->data);
 	}
 
-	public function testPersistentBindToFunction ()
+	public function testPersistentBindToFunctionAndUnbind ()
 	{
-		$this->skip();
+		$id = $this->generateRandomEventId();
+		Gwilym_Event::bind($id, 'test_gwilym_event_function_callback', true);
+		Gwilym_Event_Test::flushBindings();
+		$event = Gwilym_Event::trigger($id, 1);
+		$this->assertEqual(2, $event->data);
+		Gwilym_Event::unbind($id, 'test_gwilym_event_function_callback');
+		$event = Gwilym_Event::trigger($id, 1);
+		$this->assertEqual(1, $event->data);
 	}
 
 	public function testBindToStaticMethod ()
@@ -121,27 +146,44 @@ class Tests_Gwilym_Event extends UnitTestCase
 
 	public function testCannotPersistClosureBinding ()
 	{
-		$this->skip();
+		$this->expectException('Gwilym_Event_Exception_CannotPersistClosureBinding');
+		$id = $this->generateRandomEventId();
+		Gwilym_Event::bind($id, function($event){
+			$event->data++;
+		}, true);
 	}
 
 	public function testCannotPersistInstanceBinding ()
 	{
-		$this->skip();
+		$this->expectException('Gwilym_Event_Exception_CannotPersistInstanceBinding');
+		$id = $this->generateRandomEventId();
+		Gwilym_Event::bind($id, array($this, 'instanceMethodCallback'), true);
 	}
 
 	public function testCannotPersistInstanceEvent ()
 	{
-		$this->skip();
+		$this->expectException('Gwilym_Event_Exception_CannotPersistInstanceEvent');
+		$id = $this->generateRandomEventId();
+		Gwilym_Event::bind($this, $id, array(__CLASS__, 'staticMethodCallbackForInstanceEvent'), true);
 	}
 
 	public function testMultipleBindings ()
 	{
-		$this->skip();
+		$id = $this->generateRandomEventId();
+		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodCallback'));
+		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodPreventsDefault'));
+		$event = Gwilym_Event::trigger($id, 1);
+		$this->assertEqual(2, $event->data);
+		$this->assertTrue($event->isDefaultPrevented());
 	}
 
 	public function testDuplicateBindings ()
 	{
-		$this->skip();
+		$id = $this->generateRandomEventId();
+		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodCallback'));
+		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodCallback'));
+		$event = Gwilym_Event::trigger($id, 1);
+		$this->assertEqual(3, $event->data);
 	}
 
 	public function testBindingReturningFalsePreventsDefaultAndStopsPropagation ()

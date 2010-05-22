@@ -28,11 +28,11 @@ class Gwilym_Event
 			return;
 		}
 
-		$bindings = Gwilym_KeyStore::multiGet('event,' . $event . ',bind,*');
+		$bindings = Gwilym_KeyStore::multiGet('Gwilym_Event,' . $event . ',bind,*');
 
 		foreach ($bindings as $binding)
 		{
-			if (strpos($bindings, '::') === false)
+			if (strpos($binding, '::') === false)
 			{
 				// function callback
 				self::$_bindings[$event][] = $binding;
@@ -66,24 +66,86 @@ class Gwilym_Event
 		}
 
 		if ($object) {
-			// binding to an object may only be temporary
-			self::$_bindings[$event . '#' . spl_object_hash($object)][] = $callback;
-			return true;
+			$event = spl_object_hash($object) . '#' . $event;
 		}
 
 		self::$_bindings[$event][] = $callback;
 
-		if (!$persist || Gwilym_Reflection::isClosure($callback)) {
-			// binding a closure may only be temporary
+		if (!$persist) {
 			return true;
 		}
 
+		if (Gwilym_Reflection::isClosure($callback)) {
+			throw new Gwilym_Event_Exception_CannotPersistClosureBinding();
+		}
+
+		if ($object) {
+			throw new Gwilym_Event_Exception_CannotPersistInstanceEvent();
+		}
+
 		if (is_array($callback)) {
+			if (is_object($callback[0])) {
+				throw new Gwilym_Event_Exception_CannotPersistInstanceBinding();
+			}
+
 			// store array callbacks as strings to undo later when loading bindings
 			$callback = $callback[0] . '::' . $callback[1];
 		}
 
-		Gwilym_KeyStore::set('Gwilym_Event,' . $event . ',binding,' . md5($callback), $callback);
+		Gwilym_KeyStore::set('Gwilym_Event,' . $event . ',bind,' . md5($callback), $callback);
+	}
+
+	/**
+	* unbinds a callback from an event, including any persisted bindings
+	*
+	* @param object $object optional, the event can be object specific - binding to a specific object implies $persist = false as internal object ids are not unique between page loads
+	* @param string $event event name
+	* @param callback $callback callback, which can be a closure, an array(class, static method) or a function name - binding a closure implies $persist = false as closures cannot be serialized
+	* @return void
+	*/
+	public static function unbind ($object, $event, $callback = null)
+	{
+		$args = func_get_args();
+		$persist = true;
+
+		if (!is_object($object)) {
+			$object = null;
+			$event = array_shift($args);
+			$callback = array_shift($args);
+		}
+
+		if ($object) {
+			$event = spl_object_hash($object) . '#' . $event;
+			$persist = false; // cannot persist instance events so don't bother trying to delete them
+		}
+
+		if (Gwilym_Reflection::isClosure($callback)) {
+			$persist = false; // cannot persist closure bindings so don't bother trying to delete them
+		}
+
+		if (is_array($callback) && is_object($callback[0])) {
+			$persist = false; // cannot persist instance bindings so don't bother trying to delete them
+		}
+
+		if (isset(self::$_bindings[$event])) {
+			foreach (self::$_bindings[$event] as $binding) {
+				if ($binding === $callback) {
+					unset(self::$_bindings[$event]);
+				}
+			}
+		}
+
+		if (!$persist) {
+			// stop here if the type of event binding we're trying to unbind cannot be persisted
+			return;
+		}
+
+		// delete persisted bindings
+		if (is_array($callback)) {
+			$callback = $callback[0] . '::' . $callback[1];
+		}
+
+		Gwilym_KeyStore::delete('Gwilym_Event,' . $event . ',bind,' . md5($callback));
 	}
 
 	/**
@@ -101,7 +163,7 @@ class Gwilym_Event
 		if (is_object($object))
 		{
 			// triggering instance-specific event
-			$key = $event . '#' . spl_object_hash($object);
+			$key = spl_object_hash($object) . '#' . $event;
 		}
 		else
 		{
