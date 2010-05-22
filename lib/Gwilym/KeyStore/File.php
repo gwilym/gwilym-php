@@ -79,7 +79,7 @@ class Gwilym_KeyStore_File implements Gwilym_KeyStore_Interface
 
 		if (!file_exists($file))
 		{
-			throw new Gwilym_KeyStore_Exception_KeyDoesntExist($key);
+			return false;
 		}
 
 		if (!is_readable($file))
@@ -102,7 +102,7 @@ class Gwilym_KeyStore_File implements Gwilym_KeyStore_Interface
 
 		if (!file_exists($file))
 		{
-			throw new Gwilym_KeyStore_Exception_KeyDoesntExist($key);
+			return false;
 		}
 
 		if (!unlink($file))
