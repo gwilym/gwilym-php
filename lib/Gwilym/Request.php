@@ -13,14 +13,6 @@ class Gwilym_Request
 
 	protected $_uriParser;
 
-	public function __construct ($uri = null)
-	{
-		if ($uri !== null)
-		{
-			$this->_uri = $uri;
-		}
-	}
-
 	public function uriParser (Gwilym_UriParser $uriParser = null)
 	{
 		if ($uriParser !== null)
