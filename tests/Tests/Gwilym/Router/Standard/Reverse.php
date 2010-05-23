@@ -76,6 +76,7 @@ class Tests_Gwilym_Router_Standard_Reverse extends UnitTestCase
 		{
 			$request = new Gwilym_Request($uri);
 			$request->addRouter($this->router);
+			$request->uriParser(new Gwilym_UriParser_Fixed('', $uri));
 			$route = $this->router->requestToRoute($request);
 			$controller = $route->controller();
 			$this->assertEqual($controller, $expected[0], "uri '$uri' routed to $controller, should be {$expected[0]}");
@@ -86,7 +87,7 @@ class Tests_Gwilym_Router_Standard_Reverse extends UnitTestCase
 				$args = array();
 			}
 
-			$this->assertEqual($route->args(), $args);
+			$this->assertEqual($args, $route->args(), "URI '$uri' generated unexpected arguments. Expected " . var_export($args, true) . " found " . var_export($route->args(), true));
 		}
 	}
 }
