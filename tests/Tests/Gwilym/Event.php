@@ -58,6 +58,14 @@ class Tests_Gwilym_Event extends UnitTestCase
 	}
 
 
+	public function testType ()
+	{
+		$id = $this->generateRandomEventId();
+		Gwilym_Event::bind($id, 'test_gwilym_event_function_callback');
+		$event = Gwilym_Event::trigger($id);
+		$this->assertEqual($id, $event->type());
+	}
+
 	public function testBindToFunctionAndUnbind ()
 	{
 		$id = $this->generateRandomEventId();
@@ -129,7 +137,7 @@ class Tests_Gwilym_Event extends UnitTestCase
 		$this->assertEqual(1, $event->data);
 	}
 
-	public function testBindOnInstanceEvent ()
+	public function testBindOnInstanceEventAndUnbind ()
 	{
 		// make three binds but only one specific to this instance and then trigger - the resulting data should show only one binding was fired
 		$id = $this->generateRandomEventId();
@@ -138,6 +146,9 @@ class Tests_Gwilym_Event extends UnitTestCase
 		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodCallbackForInstanceEvent'));
 		$event = Gwilym_Event::trigger($this, $id, 1);
 		$this->assertEqual(2, $event->data);
+		Gwilym_Event::unbind($this, $id, array(__CLASS__, 'staticMethodCallbackForInstanceEvent'));
+		$event = Gwilym_Event::trigger($this, $id, 1);
+		$this->assertEqual(1, $event->data);
 	}
 
 	public function testPreventDefault ()
