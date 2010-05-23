@@ -142,7 +142,7 @@ class Tests_Gwilym_Event extends UnitTestCase
 		// make three binds but only one specific to this instance and then trigger - the resulting data should show only one binding was fired
 		$id = $this->generateRandomEventId();
 		Gwilym_Event::bind($this, $id, array(__CLASS__, 'staticMethodCallbackForInstanceEvent'));
-		Gwilym_Event::bind(new stdClass(), $id, array(__CLASS__, 'staticMethodCallbackForInstanceEvent'));
+		Gwilym_Event::bind(new stdClass, $id, array(__CLASS__, 'staticMethodCallbackForInstanceEvent'));
 		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodCallbackForInstanceEvent'));
 		$event = Gwilym_Event::trigger($this, $id, 1);
 		$this->assertEqual(2, $event->data);
