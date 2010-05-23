@@ -71,11 +71,8 @@ abstract class Gwilym_Controller
 		{
 			$this->_view = str_replace('_', '/', str_replace('^Controller_', '', '^' . get_class($this)));
 
-//			$this->_view .= '.php';
-//			$this->_view = new Gwilym_View_Php($this->_view);
-
-			$this->_view .= '.tpl';
-			$this->_view = new Gwilym_View_Twig($this->_view);
+			$this->_view = new Gwilym_View_Php($this->_view . '.php');
+//			$this->_view = new Gwilym_View_Twig($this->_view . '.tpl');
 		}
 
 		return $this->_view;
