@@ -1,1 +1,5 @@
-these files still have hard-coded references to my web server testing sub-dir "/mongodm/" so make sure to remove / change them before using
+this should be able to be dropped anywhere and just start working though you may need to do the following (assuming apache):
+
+- rename "htaccess.example" to .htaccess
+- adjust RewriteBase in .htaccess to suit your setup
+- create directory /app/var/ and make it writable
