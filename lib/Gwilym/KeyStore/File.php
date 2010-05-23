@@ -107,7 +107,7 @@ class Gwilym_KeyStore_File implements Gwilym_KeyStore_Interface
 
 		if (!unlink($file))
 		{
-			throw new Gwilym_KeyStore_File_Exception_FileDeleteError();
+			throw new Gwilym_KeyStore_File_Exception_FileDeleteError;
 		}
 
 		return true;

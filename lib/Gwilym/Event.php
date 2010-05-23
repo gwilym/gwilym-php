@@ -92,16 +92,16 @@ class Gwilym_Event
 		}
 
 		if (Gwilym_Reflection::isClosure($callback)) {
-			throw new Gwilym_Event_Exception_CannotPersistClosureBinding();
+			throw new Gwilym_Event_Exception_CannotPersistClosureBinding;
 		}
 
 		if ($object) {
-			throw new Gwilym_Event_Exception_CannotPersistInstanceEvent();
+			throw new Gwilym_Event_Exception_CannotPersistInstanceEvent;
 		}
 
 		if (is_array($callback)) {
 			if (is_object($callback[0])) {
-				throw new Gwilym_Event_Exception_CannotPersistInstanceBinding();
+				throw new Gwilym_Event_Exception_CannotPersistInstanceBinding;
 			}
 
 			// store array callbacks as strings to undo later when loading bindings
