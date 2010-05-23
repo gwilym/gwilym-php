@@ -25,13 +25,19 @@ class Gwilym_KeyStore_File implements Gwilym_KeyStore_Interface
 
 	public static $dir;
 
-	protected static function patternToRegularExpresion ($pattern)
+	public static function patternToRegularExpresion ($pattern)
 	{
 		// todo: this is really basic and needs improving
-		return '#^' . str_replace('*', '.*', $pattern) . '$#';
+
+		$pattern = strtr($pattern, array(
+			'*' => '.*',
+			'?' => '.{1}',
+		));
+
+		return '#^' . $pattern . '$#';
 	}
 
-	protected static function testFilenameAgainstPattern ($filename, $pattern)
+	public static function testFilenameAgainstPattern ($filename, $pattern)
 	{
 		$pattern = self::patternToRegularExpresion($pattern);
 		return (bool)preg_match($pattern, $filename);
