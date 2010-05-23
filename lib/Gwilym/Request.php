@@ -9,7 +9,7 @@ class Gwilym_Request
 	*
 	* @var int
 	*/
-	protected static $_nestingDepth = self::MAX_NESTING_DEPTH;
+	protected $_nestingDepth = self::MAX_NESTING_DEPTH;
 
 	protected $_routers = array();
 
@@ -48,28 +48,53 @@ class Gwilym_Request
 
 	public function handle ()
 	{
-		if (!self::$_nestingDepth--)
-		{
-			throw new Gwilym_Request_Exception_TooManyTransfers;
-		}
+		$transfer = null;
 
-		try
+		while (true)
 		{
-			foreach ($this->_routers as $index => /** @var Gwilym_Router */$router)
+			if (!$this->_nestingDepth--)
 			{
-				if (is_string($router))
-				{
-					$router = $this->_routers[$index] = new $router;
-				}
+				throw new Gwilym_Request_Exception_TooManyTransfers;
+			}
 
-				if ($router->route($this) !== false) {
-					return true;
+			try
+			{
+				if ($transfer)
+				{
+					return $transfer->follow();
+				}
+				else
+				{
+					foreach ($this->_routers as $index => /** @var Gwilym_Router */$router)
+					{
+						if (is_string($router))
+						{
+							$router = $this->_routers[$index] = new $router;
+						}
+
+						$result = $router->route($this);
+						if ($result !== false) {
+							return true;
+						}
+					}
+					break;
 				}
 			}
-		}
-		catch (Gwilym_Request_Exception_Transferred $e)
-		{
-			// this exception is thrown by the transfer() method after a transfer, forcing a jump out of all other code paths at the point of call to ->transfer()
+			catch (Gwilym_Request_Exception_Transfer $exception)
+			{
+				$transfer = null;
+
+				if (class_exists($exception->to) && Gwilym_Reflection::isClassInstanciable($exception->to))
+				{
+					$transfer = $this->route($exception->to, $exception->args);
+				}
+				else
+				{
+					$previousParser = $this->uriParser();
+					$fixedParser = new Gwilym_UriParser_Fixed($previousParser->base(), $exception->to, $previousParser->docroot());
+					$this->uriParser($fixedParser);
+				}
+			}
 		}
 
 		return false;
@@ -83,19 +108,10 @@ class Gwilym_Request
 	*/
 	public function transfer ($to, $args = array())
 	{
-		if (class_exists($to) && Gwilym_Reflection::isClassInstanciable($to))
-		{
-			$route = new Gwilym_Route($this, $to, $args);
-			$route->follow();
-		}
-		else
-		{
-			$this->uri($to);
-			$this->handle();
-		}
-
-		// this forces a jump out of all other code paths at the point of call to ->transfer()
-		throw new Gwilym_Request_Exception_Transferred;
+		$exception = new Gwilym_Request_Exception_Transfer;
+		$exception->to = $to;
+		$exception->args = $args;
+		throw $exception;
 	}
 
 	/**
@@ -108,19 +124,18 @@ class Gwilym_Request
 		return new Gwilym_Route($this, $controller, $args);
 	}
 
-	public function routeToUri ($route)
+	public function routeToUri (Gwilym_Route $route)
 	{
-		foreach ($this->_routers as /** @var Gwilym_Router */$router)
+		foreach ($this->_routers as $index => /** @var Gwilym_Router */$router)
 		{
 			if (is_string($router))
 			{
 				$router = $this->_routers[$index] = new $router;
 			}
 
-			$route = $router->routeToUri($route);
-			if ($route)
+			if ($uri = $router->routeToUri($route))
 			{
-				return $route;
+				return $uri;
 			}
 		}
 		return false;
