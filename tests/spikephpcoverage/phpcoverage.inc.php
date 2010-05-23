@@ -1,7 +1,7 @@
 <?php
     /*
     *  $Id: phpcoverage.inc.php 14670 2005-03-23 21:25:46Z npac $
-    *  
+    *
     *  Copyright(c) 2004-2006, SpikeSource Inc. All Rights Reserved.
     *  Licensed under the Open Software License version 2.1
     *  (See http://www.spikesource.com/license.html)
@@ -13,17 +13,20 @@
     global $PHPCOVERAGE_APPBASE_PATH;
 
     $basedir = dirname(__FILE__);
-    for($ii=1; $ii < $argc; $ii++) {
-        if(strpos($argv[$ii], "PHPCOVERAGE_REPORT_DIR=") !== false) {
-            parse_str($argv[$ii]);
-        }
-        else if(strpos($argv[$ii], "PHPCOVERAGE_HOME=") !== false) {
-            parse_str($argv[$ii]);
-        }
-        else if(strpos($argv[$ii], "PHPCOVERAGE_APPBASE_PATH=") !== false) {
-            parse_str($argv[$ii]);
-        }
-    }
+
+    if (isset($argc)) {
+	    for($ii=1; $ii < $argc; $ii++) {
+	        if(strpos($argv[$ii], "PHPCOVERAGE_REPORT_DIR=") !== false) {
+	            parse_str($argv[$ii]);
+	        }
+	        else if(strpos($argv[$ii], "PHPCOVERAGE_HOME=") !== false) {
+	            parse_str($argv[$ii]);
+	        }
+	        else if(strpos($argv[$ii], "PHPCOVERAGE_APPBASE_PATH=") !== false) {
+	            parse_str($argv[$ii]);
+	        }
+	    }
+	}
 
     if(empty($PHPCOVERAGE_HOME)) {
         $envvar = getenv("PHPCOVERAGE_HOME");
