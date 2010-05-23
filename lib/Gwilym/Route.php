@@ -58,6 +58,6 @@ class Gwilym_Route
 	*/
 	public function uri ()
 	{
-		return $this->request()->defaultRouter()->routeToUri($this);
+		return $this->request()->routeToUri($this);
 	}
 }

@@ -2,16 +2,26 @@
 
 class Gwilym_Request
 {
+	const MAX_NESTING_DEPTH = 20;
+
 	/**
 	* Calls to handle() may eventually make another call to handle() if transfer() is called. This value controls the maximum amount of times handle() can be called for one instance.
 	*
 	* @var int
 	*/
-	protected static $_nestingDepth = 20;
+	protected static $_nestingDepth = self::MAX_NESTING_DEPTH;
 
 	protected $_routers = array();
 
 	protected $_uriParser;
+
+	public function __construct ($uri = null)
+	{
+		if ($uri !== null)
+		{
+			$this->uriParser(new Gwilym_UriParser_Fixed('', $uri));
+		}
+	}
 
 	public function uriParser (Gwilym_UriParser $uriParser = null)
 	{
@@ -31,23 +41,13 @@ class Gwilym_Request
 		return $this->uriParser()->uri();
 	}
 
-	/**
-	* @return Gwilym_Router
-	*/
-	public function defaultRouter ()
-	{
-		return $this->_routers[0];
-	}
-
-	public function addRouter (Gwilym_Router $router)
+	public function addRouter ($router)
 	{
 		$this->_routers[] = $router;
 	}
 
 	public function handle ()
 	{
-		Gwilym_Event::trigger('Gwilym_Request_PreHandle', $this);
-
 		if (!self::$_nestingDepth--)
 		{
 			throw new Gwilym_Request_Exception_TooManyTransfers;
@@ -55,10 +55,15 @@ class Gwilym_Request
 
 		try
 		{
-			foreach ($this->_routers as /** @var Gwilym_Router */$router)
+			foreach ($this->_routers as $index => /** @var Gwilym_Router */$router)
 			{
+				if (is_string($router))
+				{
+					$router = $this->_routers[$index] = new $router;
+				}
+
 				if ($router->route($this) !== false) {
-					break;
+					return true;
 				}
 			}
 		}
@@ -67,7 +72,7 @@ class Gwilym_Request
 			// this exception is thrown by the transfer() method after a transfer, forcing a jump out of all other code paths at the point of call to ->transfer()
 		}
 
-		Gwilym_Event::trigger('Gwilym_Request_PostHandle', $this);
+		return false;
 	}
 
 	/**
@@ -101,5 +106,23 @@ class Gwilym_Request
 	public function route ($controller, $args = array())
 	{
 		return new Gwilym_Route($this, $controller, $args);
+	}
+
+	public function routeToUri ($route)
+	{
+		foreach ($this->_routers as /** @var Gwilym_Router */$router)
+		{
+			if (is_string($router))
+			{
+				$router = $this->_routers[$index] = new $router;
+			}
+
+			$route = $router->routeToUri($route);
+			if ($route)
+			{
+				return $route;
+			}
+		}
+		return false;
 	}
 }
