@@ -12,8 +12,12 @@ class AllTests extends TestSuite {
 	function AllTests() {
 		$this->TestSuite('All tests');
 		$this->addTestClass('Tests_Gwilym_Event');
+		$this->addTestClass('Tests_gwilym_KeyStore_File');
 		$this->addTestClass('Tests_Gwilym_Request');
 		$this->addTestClass('Tests_Gwilym_Router_Standard_Reverse');
+		$this->addTestClass('Tests_Gwilym_String');
+		$this->addTestClass('Tests_Gwilym_UriParser_Fixed');
+		$this->addTestClass('Tests_Gwilym_UriParser_Guess');
 	}
 }
 
@@ -21,34 +25,18 @@ Gwilym_Autoloader::addPath(dirname(__FILE__));
 $suite = new AllTests();
 
 if (@$_GET['coverage']) {
-	global $PHPCOVERAGE_HOME;
-	$PHPCOVERAGE_HOME = dirname(__FILE__) . '/spikephpcoverage';
-	require_once($PHPCOVERAGE_HOME . '/phpcoverage.inc.php');
-	require_once($PHPCOVERAGE_HOME . '/CoverageRecorder.php');
-	require_once($PHPCOVERAGE_HOME . '/reporter/HtmlCoverageReporter.php');
-	$spikePhpCoverageHtmlReporter = new HtmlCoverageReporter("Code Coverage Report", "", "report");
+	$filter = PHP_CodeCoverage_Filter::getInstance();
+	$filter->addDirectoryToBlacklist(dirname(__FILE__));
 
-	$include = array(
-		GWILYM_BASE_DIR,
-	);
-
-	$exclude = array(
-		GWILYM_APP_DIR . '/var',
-		GWILYM_LIB_DIR . '/Twig',
-		dirname(__FILE__),
-	);
-
-	$spikePhpCoverageRecorder = new CoverageRecorder($include, $exclude, $spikePhpCoverageHtmlReporter);
-	$spikePhpCoverageRecorder->startInstrumentation();
+	$coverage = new PHP_CodeCoverage();
+	$coverage->start('UnitTests');
 }
 
 $suite->run(new DefaultReporter());
 
 if (@$_GET['coverage']) {
-	$spikePhpCoverageRecorder->stopInstrumentation();
-	set_time_limit(0);
-	$spikePhpCoverageRecorder->generateReport();
-	echo '<pre>';
-	$spikePhpCoverageHtmlReporter->printTextSummary();
-	echo '</pre>';
+	$coverage->stop();
+
+	$writer = new PHP_CodeCoverage_Report_HTML;
+	$writer->process($coverage, dirname(__FILE__) . '/report');
 }
