@@ -13,10 +13,10 @@ class Gwilym_String
 	*/
 	public static function unltrim ($str, $left)
 	{
-		if (substr($str, 0, strlen($left)) !== $left)
+		if (substr($str, 0, strlen($left)) === $left)
 		{
-			return $left . $str;
+			return $str;
 		}
-		return $str;
+		return $left . $str;
 	}
 }
