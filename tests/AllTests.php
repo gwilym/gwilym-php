@@ -1,5 +1,8 @@
 <?php
 
+ini_set('display_errors', 'on');
+error_reporting(E_ALL ^ E_DEPRECATED);
+
 require_once(dirname(dirname(__FILE__)) . '/bootstrap.php');
 
 error_reporting(E_ALL ^ E_DEPRECATED);
@@ -37,6 +40,9 @@ $suite->run(new DefaultReporter());
 if (@$_GET['coverage']) {
 	$coverage->stop();
 
+	$report = dirname(__FILE__) . '/coverage/' . date('Y_m_d-H_i_s');
+	mkdir($report);
+
 	$writer = new PHP_CodeCoverage_Report_HTML;
-	$writer->process($coverage, dirname(__FILE__) . '/report');
+	$writer->process($coverage, $report);
 }
