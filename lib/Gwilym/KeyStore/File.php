@@ -23,8 +23,6 @@ class Gwilym_KeyStore_File implements Gwilym_KeyStore_Interface
 		"\0"
 	);
 
-	public static $dir;
-
 	public static function patternToRegularExpresion ($pattern)
 	{
 		// todo: this is really basic and needs improving
@@ -43,28 +41,39 @@ class Gwilym_KeyStore_File implements Gwilym_KeyStore_Interface
 		return (bool)preg_match($pattern, $filename);
 	}
 
-	public static function keyToFilename ($key)
+	protected $_dir;
+
+	public function __construct ($dir = null)
+	{
+		if ($dir === null)
+		{
+			$this->_dir = GWILYM_VAR_DIR . '/keystore';
+		}
+		else
+		{
+			$this->_dir = $dir;
+		}
+	}
+
+	public function keyToFilename ($key)
 	{
 		$filename = str_replace(self::$_badCharacters, '', $key);
-		if ($filename !== $key)
-		{
+		if ($filename !== $key) {
 			throw new Gwilym_KeyStore_File_Exception_InvalidKeyName($key);
 		}
 
-		if (!file_exists(self::$dir))
-		{
-			if (!mkdir(self::$dir))
-			{
-				throw new Gwilym_KeyStore_File_Exception_DirectoryCreateError(self::$dir);
+		if (!file_exists($this->_dir)) {
+			if (!@mkdir($this->_dir)) {
+				throw new Gwilym_KeyStore_File_Exception_DirectoryCreateError($this->_dir);
 			}
 		}
 
-		return self::$dir . '/' . $filename;
+		return $this->_dir . '/' . $filename;
 	}
 
-	public static function set ($key, $value)
+	public function set ($key, $value)
 	{
-		$file = self::keyToFilename($key);
+		$file = $this->keyToFilename($key);
 
 		if (file_exists($file) && !is_writable($file))
 		{
@@ -79,9 +88,9 @@ class Gwilym_KeyStore_File implements Gwilym_KeyStore_Interface
 		return true;
 	}
 
-	public static function get ($key)
+	public function get ($key)
 	{
-		$file = self::keyToFilename($key);
+		$file = $this->keyToFilename($key);
 
 		if (!file_exists($file))
 		{
@@ -96,19 +105,19 @@ class Gwilym_KeyStore_File implements Gwilym_KeyStore_Interface
 		return file_get_contents($file);
 	}
 
-	public static function exists ($key)
+	public function exists ($key)
 	{
-		$file = self::keyToFilename($key);
+		$file = $this->keyToFilename($key);
 		return file_exists($file);
 	}
 
-	public static function delete ($key)
+	public function delete ($key)
 	{
-		$file = self::keyToFilename($key);
+		$file = $this->keyToFilename($key);
 
 		if (!file_exists($file))
 		{
-			return false;
+			return true;
 		}
 
 		if (!unlink($file))
@@ -119,14 +128,21 @@ class Gwilym_KeyStore_File implements Gwilym_KeyStore_Interface
 		return true;
 	}
 
-	public static function multiSet ($keyValues)
+	public function multiSet ($keyValues)
 	{
-		throw new Exception();
+		foreach ($keyValues as $key => $value)
+		{
+			if (!$this->set($key, $value))
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
-	public static function multiGet ($pattern)
+	public function multiGet ($pattern)
 	{
-		$dir = dir(self::$dir);
+		$dir = dir($this->_dir);
 		$results = array();
 		while ($file = $dir->read())
 		{
@@ -139,25 +155,60 @@ class Gwilym_KeyStore_File implements Gwilym_KeyStore_Interface
 				continue;
 			}
 
-			$results[$file] = self::get($file);
+			$results[$file] = $this->get($file);
 		}
 		return $results;
 	}
 
-	public static function increment ($key, $value = null)
+	public function multiDelete ($pattern)
 	{
-		throw new Exception();
+		$dir = dir($this->_dir);
+
+		while ($file = $dir->read())
+		{
+			if ($file == '.' || $file == '..')
+			{
+				continue;
+			}
+			if (!self::testFilenameAgainstPattern($file, $pattern))
+			{
+				continue;
+			}
+
+			if (!$this->delete($file))
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
-	public static function decrement ($key, $value = null)
+	public function increment ($key, $value = 1)
 	{
-		throw new Exception();
+		$value = (int)$this->get($key) + $value;
+		if ($this->set($key, $value)) {
+			return $value;
+		}
+		return false;
 	}
 
-	public static function append ($key, $value)
+	public function decrement ($key, $value = 1)
 	{
-		throw new Exception();
+		return $this->increment($key, 0-(int)$value);
+	}
+
+	public function append ($key, $value)
+	{
+		$current = $this->get($key);
+		if ($current === false) {
+			$current = $value;
+		} else {
+			$current .= $value;
+		}
+		if (!$this->set($key, $current)) {
+			return false;
+		}
+		return strlen($current);
 	}
 }
-
-Gwilym_KeyStore_File::$dir = GWILYM_VAR_DIR . '/keystore';

@@ -10,7 +10,7 @@ interface Gwilym_KeyStore_Interface
 	* @return bool true
 	* @throws Gwilym_KeyStore_Exception
 	*/
-	public static function set ($key, $value);
+	public function set ($key, $value);
 
 	/**
 	* Get value of key $key
@@ -19,7 +19,7 @@ interface Gwilym_KeyStore_Interface
 	* @return mixed string value of key $key
 	* @throws Gwilym_KeyStore_Exception
 	*/
-	public static function get ($key);
+	public function get ($key);
 
 	/**
 	* Checks if key $key exists
@@ -28,7 +28,7 @@ interface Gwilym_KeyStore_Interface
 	* @return bool true if key $key exists otherwise false
 	* @throws Gwilym_KeyStore_Exception
 	*/
-	public static function exists ($key);
+	public function exists ($key);
 
 	/**
 	* Deletes key $key
@@ -37,30 +37,35 @@ interface Gwilym_KeyStore_Interface
 	* @return bool true
 	* @throws Gwilym_KeyStore_Exception
 	*/
-	public static function delete ($key);
+	public function delete ($key);
 
 	/**
 	* @throws Gwilym_KeyStore_Exception
 	*/
-	public static function multiSet ($keyValues);
+	public function multiSet ($keyValues);
 
 	/**
 	* @throws Gwilym_KeyStore_Exception
 	*/
-	public static function multiGet ($pattern);
+	public function multiGet ($pattern);
 
 	/**
 	* @throws Gwilym_KeyStore_Exception
 	*/
-	public static function increment ($key, $value = null);
+	public function multiDelete ($pattern);
 
 	/**
 	* @throws Gwilym_KeyStore_Exception
 	*/
-	public static function decrement ($key, $value = null);
+	public function increment ($key, $value = null);
 
 	/**
 	* @throws Gwilym_KeyStore_Exception
 	*/
-	public static function append ($key, $value);
+	public function decrement ($key, $value = null);
+
+	/**
+	* @throws Gwilym_KeyStore_Exception
+	*/
+	public function append ($key, $value);
 }
