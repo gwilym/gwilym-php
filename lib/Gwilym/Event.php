@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * This class implements an Event bind and trigger system within PHP with support for persisting event bindings between page calls via the Gwilym_KeyStore class.
+ *
+ * Event triggers can either be global or isolated to a specific instance of any PHP object (requires PHP 5.2.0+ for spl_object_hash()).
+ *
+ * Event bindings can be any valid PHP callback (such as functions, static public methods, instance public methods or closures in PHP 5.3.0+). However, only functions and static public method bindings can be persisted, and bindings for instance-specific events will also not be persisted.
+ *
+ * @todo look at changing format of keys in the keystore and load all event bindings in one go, versus checking on each trigger
+ */
 class Gwilym_Event
 {
 	protected static $_instance;
