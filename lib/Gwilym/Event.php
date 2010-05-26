@@ -7,24 +7,36 @@ class Gwilym_Event
 	*
 	* @var array<callback>
 	*/
-	protected static $_bindings = array();
+	protected $_bindings = array();
 
 	/**
 	* storage for whether an event has had persistent bindings loaded yet, in the format of event_id => bool
 	*
 	* @var array<bool>
 	*/
-	protected static $_loaded = array();
+	protected $_loaded = array();
+
+	public function __construct (Gwilym_KeyStore_Interface $keystore = null)
+	{
+		if (func_num_args())
+		{
+			$this->_keystore = $keystore;
+		}
+		else
+		{
+			$this->_keystore = Gwilym_KeyStore::factory();
+		}
+	}
 
 	/**
 	* flushes all in-memory bindings, but does not affect persisted bindings - generally used for tests only to clear memory and force a load from persisted bindings
 	*
 	* @return void
 	*/
-	protected static function _flushBindings ()
+	protected function _flushBindings ()
 	{
-		self::$_bindings = array();
-		self::$_loaded = array();
+		$this->_bindings = array();
+		$this->_loaded = array();
 	}
 
 	/**
@@ -33,30 +45,30 @@ class Gwilym_Event
 	* @param string $event
 	* @return void
 	*/
-	protected static function _load ($event)
+	protected function _load ($event)
 	{
-		if (isset(self::$_loaded[$event]) && self::$_loaded[$event]) {
+		if (isset($this->_loaded[$event]) && $this->_loaded[$event]) {
 			return;
 		}
 
-		$bindings = Gwilym_KeyStore::multiGet('Gwilym_Event,' . $event . ',bind,*');
+		$bindings = Gwilym_KeyStore::factory()->multiGet('Gwilym_Event,' . $event . ',bind,*');
 
 		foreach ($bindings as $binding)
 		{
 			if (strpos($binding, '::') === false)
 			{
 				// function callback
-				self::$_bindings[$event][] = $binding;
+				$this->_bindings[$event][] = $binding;
 			}
 			else
 			{
 				// class::static callback
 				$binding = explode('::', $binding);
-				self::$_bindings[$event][] = array($binding[0], $binding[1]);
+				$this->_bindings[$event][] = array($binding[0], $binding[1]);
 			}
 		}
 
-		self::$_loaded[$event] = true;
+		$this->_loaded[$event] = true;
 	}
 
 	/**
@@ -70,7 +82,7 @@ class Gwilym_Event
 	* @throws Gwilym_Event_Exception_CannotPersistInstanceEvent if an attempt is made to persist a binding to an instance-specific event
 	* @throws Gwilym_Event_Exception_CannotPersistInstanceBinding if an attempt is made to persist an instance-specific binding
 	*/
-	public static function bind ($object, $event, $callback = null, $persist = null)
+	public function bind ($object, $event, $callback = null, $persist = null)
 	{
 		$args = func_get_args();
 
@@ -85,7 +97,7 @@ class Gwilym_Event
 			$event = spl_object_hash($object) . '#' . $event;
 		}
 
-		self::$_bindings[$event][] = $callback;
+		$this->_bindings[$event][] = $callback;
 
 		if (!$persist) {
 			return true;
@@ -108,7 +120,7 @@ class Gwilym_Event
 			$callback = $callback[0] . '::' . $callback[1];
 		}
 
-		Gwilym_KeyStore::set('Gwilym_Event,' . $event . ',bind,' . md5($callback), $callback);
+		Gwilym_KeyStore::factory()->set('Gwilym_Event,' . $event . ',bind,' . md5($callback), $callback);
 	}
 
 	/**
@@ -119,7 +131,7 @@ class Gwilym_Event
 	* @param callback $callback callback, which can be a closure, an array(class, static method) or a function name - binding a closure implies $persist = false as closures cannot be serialized
 	* @return void
 	*/
-	public static function unbind ($object, $event, $callback = null)
+	public function unbind ($object, $event, $callback = null)
 	{
 		$args = func_get_args();
 		$persist = true;
@@ -143,10 +155,10 @@ class Gwilym_Event
 			$persist = false; // cannot persist instance bindings so don't bother trying to delete them
 		}
 
-		if (isset(self::$_bindings[$event])) {
-			foreach (self::$_bindings[$event] as $binding) {
+		if (isset($this->_bindings[$event])) {
+			foreach ($this->_bindings[$event] as $binding) {
 				if ($binding === $callback) {
-					unset(self::$_bindings[$event]);
+					unset($this->_bindings[$event]);
 				}
 			}
 		}
@@ -161,7 +173,7 @@ class Gwilym_Event
 			$callback = $callback[0] . '::' . $callback[1];
 		}
 
-		Gwilym_KeyStore::delete('Gwilym_Event,' . $event . ',bind,' . md5($callback));
+		Gwilym_KeyStore::factory()->delete('Gwilym_Event,' . $event . ',bind,' . md5($callback));
 	}
 
 	/**
@@ -172,7 +184,7 @@ class Gwilym_Event
 	* @param mixed $data optional
 	* @return Gwilym_Event
 	*/
-	public static function trigger ($object, $event = null, $data = null)
+	public function trigger ($object, $event = null, $data = null)
 	{
 		$args = func_get_args();
 
@@ -188,18 +200,19 @@ class Gwilym_Event
 			$event = $object;
 			$key = $event;
 			$object = null;
-			self::_load($event);
+			$this->_load($event);
 		}
 
-		$instance = new self($event);
+		$instance = new self;
+		$instance->type($event);
 		$instance->data = $data;
 
-		if (!isset(self::$_bindings[$key]))
+		if (!isset($this->_bindings[$key]))
 		{
 			return $instance;
 		}
 
-		foreach (self::$_bindings[$key] as $binding)
+		foreach ($this->_bindings[$key] as $binding)
 		{
 			$result = call_user_func($binding, $instance);
 
@@ -247,14 +260,14 @@ class Gwilym_Event
 
 	protected $_type;
 
-	public function type ()
+	public function type ($type = null)
 	{
+		if (func_num_args())
+		{
+			$this->_type = $type;
+			return $this;
+		}
 		return $this->_type;
-	}
-
-	public function __construct ($type)
-	{
-		$this->_type = $type;
 	}
 
 	/** @var mixed data payload provided by trigger() */

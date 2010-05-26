@@ -5,7 +5,7 @@ class Gwilym_Event_Test extends Gwilym_Event
 	/** for testing, a public accessor for _flushBindings */
 	public function flushBindings ()
 	{
-		self::_flushBindings();
+		$this->_flushBindings();
 	}
 }
 
@@ -16,9 +16,11 @@ function test_gwilym_event_function_callback (Gwilym_Event $event)
 
 class Tests_Gwilym_Event extends UnitTestCase
 {
+	protected $_event;
+
 	public function setUp ()
 	{
-		Gwilym_Event_Test::flushBindings();
+		$this->_event = new Gwilym_Event_Test();
 	}
 
 	protected function generateRandomEventId ()
@@ -61,65 +63,65 @@ class Tests_Gwilym_Event extends UnitTestCase
 	public function testType ()
 	{
 		$id = $this->generateRandomEventId();
-		Gwilym_Event::bind($id, 'test_gwilym_event_function_callback');
-		$event = Gwilym_Event::trigger($id);
+		$this->_event->bind($id, 'test_gwilym_event_function_callback');
+		$event = $this->_event->trigger($id);
 		$this->assertEqual($id, $event->type());
 	}
 
 	public function testBindToFunctionAndUnbind ()
 	{
 		$id = $this->generateRandomEventId();
-		Gwilym_Event::bind($id, 'test_gwilym_event_function_callback');
-		$event = Gwilym_Event::trigger($id, 1);
+		$this->_event->bind($id, 'test_gwilym_event_function_callback');
+		$event = $this->_event->trigger($id, 1);
 		$this->assertEqual(2, $event->data);
-		Gwilym_Event::unbind($id, 'test_gwilym_event_function_callback');
-		$event = Gwilym_Event::trigger($id, 1);
+		$this->_event->unbind($id, 'test_gwilym_event_function_callback');
+		$event = $this->_event->trigger($id, 1);
 		$this->assertEqual(1, $event->data);
 	}
 
 	public function testPersistentBindToFunctionAndUnbind ()
 	{
 		$id = $this->generateRandomEventId();
-		Gwilym_Event::bind($id, 'test_gwilym_event_function_callback', true);
-		Gwilym_Event_Test::flushBindings();
-		$event = Gwilym_Event::trigger($id, 1);
+		$this->_event->bind($id, 'test_gwilym_event_function_callback', true);
+		$this->_event->flushBindings();
+		$event = $this->_event->trigger($id, 1);
 		$this->assertEqual(2, $event->data);
-		Gwilym_Event::unbind($id, 'test_gwilym_event_function_callback');
-		$event = Gwilym_Event::trigger($id, 1);
+		$this->_event->unbind($id, 'test_gwilym_event_function_callback');
+		$event = $this->_event->trigger($id, 1);
 		$this->assertEqual(1, $event->data);
 	}
 
 	public function testBindToStaticMethodAndUnbind ()
 	{
 		$id = $this->generateRandomEventId();
-		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodCallback'));
-		$event = Gwilym_Event::trigger($id, 1);
+		$this->_event->bind($id, array(__CLASS__, 'staticMethodCallback'));
+		$event = $this->_event->trigger($id, 1);
 		$this->assertEqual(2, $event->data);
-		Gwilym_Event::unbind($id, array(__CLASS__, 'staticMethodCallback'));
-		$event = Gwilym_Event::trigger($id, 1);
+		$this->_event->unbind($id, array(__CLASS__, 'staticMethodCallback'));
+		$event = $this->_event->trigger($id, 1);
 		$this->assertEqual(1, $event->data);
 	}
 
 	public function testPersistentBindToStaticMethodAndUnbind ()
 	{
 		$id = $this->generateRandomEventId();
-		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodCallback'), true);
-		Gwilym_Event_Test::flushBindings();
-		$event = Gwilym_Event::trigger($id, 1);
+		$this->_event->bind($id, array(__CLASS__, 'staticMethodCallback'), true);
+		$this->_event->flushBindings();
+		$event = $this->_event->trigger($id, 1);
 		$this->assertEqual(2, $event->data);
-		Gwilym_Event::unbind($id, array(__CLASS__, 'staticMethodCallback'));
-		$event = Gwilym_Event::trigger($id, 1);
+		$this->_event->unbind($id, array(__CLASS__, 'staticMethodCallback'));
+		$event = $this->_event->trigger($id, 1);
 		$this->assertEqual(1, $event->data);
 	}
 
 	public function testBindToInstanceMethodAndUnbind ()
 	{
 		$id = $this->generateRandomEventId();
-		Gwilym_Event::bind($id, array($this, 'instanceMethodCallback'));
-		$event = Gwilym_Event::trigger($id, 1);
+		$this->_event->bind($id, array($this, 'instanceMethodCallback'));
+		$event = $this->_event->trigger($id, 1);
 		$this->assertEqual(2, $event->data);
-		Gwilym_Event::unbind($id, array($this, 'instanceMethodCallback'));
-		$event = Gwilym_Event::trigger($id, 1);
+		$this->_event->unbind($id, array($this, 'instanceMethodCallback'));
+		$event = $this->_event->trigger($id, 1);
 		$this->assertEqual(1, $event->data);
 	}
 
@@ -129,11 +131,11 @@ class Tests_Gwilym_Event extends UnitTestCase
 		$closure = function($event){
 			$event->data++;
 		};
-		Gwilym_Event::bind($id, $closure);
-		$event = Gwilym_Event::trigger($id, 1);
+		$this->_event->bind($id, $closure);
+		$event = $this->_event->trigger($id, 1);
 		$this->assertEqual(2, $event->data);
-		Gwilym_Event::unbind($id, $closure);
-		$event = Gwilym_Event::trigger($id, 1);
+		$this->_event->unbind($id, $closure);
+		$event = $this->_event->trigger($id, 1);
 		$this->assertEqual(1, $event->data);
 	}
 
@@ -141,21 +143,21 @@ class Tests_Gwilym_Event extends UnitTestCase
 	{
 		// make three binds but only one specific to this instance and then trigger - the resulting data should show only one binding was fired
 		$id = $this->generateRandomEventId();
-		Gwilym_Event::bind($this, $id, array(__CLASS__, 'staticMethodCallbackForInstanceEvent'));
-		Gwilym_Event::bind(new stdClass, $id, array(__CLASS__, 'staticMethodCallbackForInstanceEvent'));
-		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodCallbackForInstanceEvent'));
-		$event = Gwilym_Event::trigger($this, $id, 1);
+		$this->_event->bind($this, $id, array(__CLASS__, 'staticMethodCallbackForInstanceEvent'));
+		$this->_event->bind(new stdClass, $id, array(__CLASS__, 'staticMethodCallbackForInstanceEvent'));
+		$this->_event->bind($id, array(__CLASS__, 'staticMethodCallbackForInstanceEvent'));
+		$event = $this->_event->trigger($this, $id, 1);
 		$this->assertEqual(2, $event->data);
-		Gwilym_Event::unbind($this, $id, array(__CLASS__, 'staticMethodCallbackForInstanceEvent'));
-		$event = Gwilym_Event::trigger($this, $id, 1);
+		$this->_event->unbind($this, $id, array(__CLASS__, 'staticMethodCallbackForInstanceEvent'));
+		$event = $this->_event->trigger($this, $id, 1);
 		$this->assertEqual(1, $event->data);
 	}
 
 	public function testPreventDefault ()
 	{
 		$id = $this->generateRandomEventId();
-		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodPreventsDefault'));
-		$event = Gwilym_Event::trigger($id);
+		$this->_event->bind($id, array(__CLASS__, 'staticMethodPreventsDefault'));
+		$event = $this->_event->trigger($id);
 		$this->assertTrue($event->isDefaultPrevented());
 		$this->assertFalse($event->isPropagationStopped());
 	}
@@ -164,9 +166,9 @@ class Tests_Gwilym_Event extends UnitTestCase
 	{
 		// bind twice, but the first should prevent the second, so default will never be prevented
 		$id = $this->generateRandomEventId();
-		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodStopsPropagation'));
-		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodPreventsDefault'));
-		$event = Gwilym_Event::trigger($id);
+		$this->_event->bind($id, array(__CLASS__, 'staticMethodStopsPropagation'));
+		$this->_event->bind($id, array(__CLASS__, 'staticMethodPreventsDefault'));
+		$event = $this->_event->trigger($id);
 		$this->assertFalse($event->isDefaultPrevented());
 		$this->assertTrue($event->isPropagationStopped());
 	}
@@ -175,7 +177,7 @@ class Tests_Gwilym_Event extends UnitTestCase
 	{
 		$this->expectException('Gwilym_Event_Exception_CannotPersistClosureBinding');
 		$id = $this->generateRandomEventId();
-		Gwilym_Event::bind($id, function($event){
+		$this->_event->bind($id, function($event){
 			$event->data++;
 		}, true);
 	}
@@ -184,22 +186,22 @@ class Tests_Gwilym_Event extends UnitTestCase
 	{
 		$this->expectException('Gwilym_Event_Exception_CannotPersistInstanceBinding');
 		$id = $this->generateRandomEventId();
-		Gwilym_Event::bind($id, array($this, 'instanceMethodCallback'), true);
+		$this->_event->bind($id, array($this, 'instanceMethodCallback'), true);
 	}
 
 	public function testCannotPersistInstanceEvent ()
 	{
 		$this->expectException('Gwilym_Event_Exception_CannotPersistInstanceEvent');
 		$id = $this->generateRandomEventId();
-		Gwilym_Event::bind($this, $id, array(__CLASS__, 'staticMethodCallbackForInstanceEvent'), true);
+		$this->_event->bind($this, $id, array(__CLASS__, 'staticMethodCallbackForInstanceEvent'), true);
 	}
 
 	public function testMultipleBindings ()
 	{
 		$id = $this->generateRandomEventId();
-		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodCallback'));
-		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodPreventsDefault'));
-		$event = Gwilym_Event::trigger($id, 1);
+		$this->_event->bind($id, array(__CLASS__, 'staticMethodCallback'));
+		$this->_event->bind($id, array(__CLASS__, 'staticMethodPreventsDefault'));
+		$event = $this->_event->trigger($id, 1);
 		$this->assertEqual(2, $event->data);
 		$this->assertTrue($event->isDefaultPrevented());
 	}
@@ -207,9 +209,9 @@ class Tests_Gwilym_Event extends UnitTestCase
 	public function testDuplicateBindings ()
 	{
 		$id = $this->generateRandomEventId();
-		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodCallback'));
-		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodCallback'));
-		$event = Gwilym_Event::trigger($id, 1);
+		$this->_event->bind($id, array(__CLASS__, 'staticMethodCallback'));
+		$this->_event->bind($id, array(__CLASS__, 'staticMethodCallback'));
+		$event = $this->_event->trigger($id, 1);
 		$this->assertEqual(3, $event->data);
 	}
 
@@ -217,9 +219,9 @@ class Tests_Gwilym_Event extends UnitTestCase
 	{
 		// if staticMethodCallback is fired, event->data will increase and this will fail
 		$id = $this->generateRandomEventId();
-		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodReturnsFalse'));
-		Gwilym_Event::bind($id, array(__CLASS__, 'staticMethodCallback'));
-		$event = Gwilym_Event::trigger($id, 1);
+		$this->_event->bind($id, array(__CLASS__, 'staticMethodReturnsFalse'));
+		$this->_event->bind($id, array(__CLASS__, 'staticMethodCallback'));
+		$event = $this->_event->trigger($id, 1);
 		$this->assertEqual(1, $event->data);
 		$this->assertTrue($event->isDefaultPrevented());
 		$this->assertTrue($event->isPropagationStopped());
