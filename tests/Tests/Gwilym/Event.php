@@ -60,6 +60,11 @@ class Tests_Gwilym_Event extends UnitTestCase
 	}
 
 
+	public function testFactory ()
+	{
+		$this->assertIsA(Gwilym_Event::factory(), 'Gwilym_Event');
+	}
+
 	public function testType ()
 	{
 		$id = $this->generateRandomEventId();
