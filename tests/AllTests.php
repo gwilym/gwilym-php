@@ -5,7 +5,11 @@ error_reporting(E_ALL ^ E_DEPRECATED);
 
 require_once(dirname(dirname(__FILE__)) . '/bootstrap.php');
 
-error_reporting(E_ALL ^ E_DEPRECATED);
+if (defined('E_DEPRECATED')) {
+	error_reporting(E_ALL ^ E_DEPRECATED);
+} else {
+	error_reporting(E_ALL);
+}
 
 require_once dirname(__FILE__) . '/simpletest/unit_tester.php';
 require_once dirname(__FILE__) . '/simpletest/mock_objects.php';
@@ -15,7 +19,7 @@ class AllTests extends TestSuite {
 	function AllTests() {
 		$this->TestSuite('All tests');
 		$this->addTestClass('Tests_Gwilym_Event');
-		$this->addTestClass('Tests_gwilym_KeyStore_File');
+		$this->addTestClass('Tests_Gwilym_KeyStore_File');
 		$this->addTestClass('Tests_Gwilym_Request');
 		$this->addTestClass('Tests_Gwilym_Router_Standard_Reverse');
 		$this->addTestClass('Tests_Gwilym_String');

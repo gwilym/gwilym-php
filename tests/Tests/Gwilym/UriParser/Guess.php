@@ -14,11 +14,23 @@ class Tests_Gwilym_UriParser_Guess extends UnitTestCase
 		$this->assertEqual(GWILYM_BASE_DIR, $parser->requestBaseDir());
 	}
 
+	public function testParseOnNotWindows ()
+	{
+		if (Gwilym_PHP::isWindows())
+		{
+			$this->skip();
+		}
+
+		// not written yet
+		$this->skip();
+	}
+
 	public function testParseOnWindows ()
 	{
 		if (!Gwilym_PHP::isWindows())
 		{
 			$this->skip();
+			return;
 		}
 
 		$parser = new Gwilym_UriParser_Guess();
