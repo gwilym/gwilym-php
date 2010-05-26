@@ -2,6 +2,18 @@
 
 class Gwilym_Event
 {
+	protected static $_instance;
+
+	/** @var support named instances etc. */
+	public static function factory ()
+	{
+		if (self::$_instance === null)
+		{
+			self::$_instance = new self;
+		}
+		return self::$_instance;
+	}
+
 	/**
 	* storage for bindings for an event, in the format of event_id => callback
 	*
@@ -51,7 +63,7 @@ class Gwilym_Event
 			return;
 		}
 
-		$bindings = Gwilym_KeyStore::factory()->multiGet('Gwilym_Event,' . $event . ',bind,*');
+		$bindings = $this->_keystore->multiGet('Gwilym_Event,' . $event . ',bind,*');
 
 		foreach ($bindings as $binding)
 		{
@@ -120,7 +132,7 @@ class Gwilym_Event
 			$callback = $callback[0] . '::' . $callback[1];
 		}
 
-		Gwilym_KeyStore::factory()->set('Gwilym_Event,' . $event . ',bind,' . md5($callback), $callback);
+		$this->_keystore->set('Gwilym_Event,' . $event . ',bind,' . md5($callback), $callback);
 	}
 
 	/**
@@ -173,7 +185,7 @@ class Gwilym_Event
 			$callback = $callback[0] . '::' . $callback[1];
 		}
 
-		Gwilym_KeyStore::factory()->delete('Gwilym_Event,' . $event . ',bind,' . md5($callback));
+		$this->_keystore->delete('Gwilym_Event,' . $event . ',bind,' . md5($callback));
 	}
 
 	/**
