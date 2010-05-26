@@ -9,7 +9,16 @@ class Gwilym_UriParser_Fixed extends Gwilym_UriParser
 	public function __construct ($base, $uri = null, $docroot = null)
 	{
 		$this->_base = $base;
-		$this->_uri = $uri;
+
+		if ($uri === null)
+		{
+			$this->_uri = substr($_SERVER['REQUEST_URI'], strlen($this->_base));
+		}
+		else
+		{
+			$this->_uri = $uri;
+		}
+
 		$this->_docroot = $docroot;
 	}
 
