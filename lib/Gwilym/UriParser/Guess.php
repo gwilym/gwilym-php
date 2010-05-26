@@ -68,6 +68,9 @@ class Gwilym_UriParser_Guess extends Gwilym_UriParser
 				// match - found an alignment of the directories that the bootstrap file is in, compared to the uri requested
 				$this->_base = '/' . implode('/', $subdir);
 				$this->_docroot = implode(DIRECTORY_SEPARATOR, array_slice($base, 0, count($base) - $i));
+				if (!Gwilym_PHP::isWindows()) {
+					$this->_docroot  = DIRECTORY_SEPARATOR . $this->_docroot;
+				}
 				$this->_uri = '/' . implode('/', array_slice($uri, $i));
 				$this->_parsed = true;
 				return;
