@@ -112,9 +112,15 @@ class PHP_CodeCoverage_Filter
           $directory, $suffix, $prefix
         );
 
-        foreach ($files as $file) {
-            $this->addFileToBlacklist($file->getPathName(), $group, FALSE);
-        }
+        try
+        {
+	        foreach ($files as $file) {
+	            $this->addFileToBlacklist($file->getPathName(), $group, FALSE);
+	        }
+		} catch (UnexpectedValueException $xception)
+		{
+			// wtf
+		}
     }
 
     /**
