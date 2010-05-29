@@ -33,7 +33,7 @@ class Gwilym_KeyStore_Mongodb implements Gwilym_KeyStore_Interface
 	protected function _collection ()
 	{
 		if ($this->_mongo_collection === null) {
-			$this->_mongo_collection = $this->_mongo->selectDB(Gwilym_Config_KeyStore_Mongodb::DATABASE)->selectCollection(Gwilym_Config_KeyStore_Mongodb::COLLECTION);
+			$this->_mongo_collection = $this->_mongo->selectDB(Gwilym_Config_KeyStore_Mongodb::$database)->selectCollection(Gwilym_Config_KeyStore_Mongodb::$collection);
 		}
 		$this->_mongo->connect();
 		return $this->_mongo_collection;
@@ -41,7 +41,7 @@ class Gwilym_KeyStore_Mongodb implements Gwilym_KeyStore_Interface
 
 	public function __construct ()
 	{
-		$this->_mongo = new Mongo(Gwilym_Config_KeyStore_Mongodb::SERVER, false);
+		$this->_mongo = new Mongo(Gwilym_Config_KeyStore_Mongodb::$server, false);
 	}
 
 	/**
