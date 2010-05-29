@@ -135,7 +135,7 @@ class Gwilym_Request
 
 			if ($uri = $router->routeToUri($route))
 			{
-				return $uri;
+				return $this->uriParser()->base() . $uri;
 			}
 		}
 		return false;
