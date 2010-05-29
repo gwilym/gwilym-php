@@ -2,7 +2,7 @@
 
 class Gwilym_Config_KeyStore_Mongodb extends Gwilym_Config
 {
-	const SERVER = 'localhost';
-	const DATABASE = 'keystore';
-	const COLLECTION = 'keystore';
+	public static $server = 'localhost';
+	public static $database = 'keystore';
+	public static $collection = 'keystore';
 }
