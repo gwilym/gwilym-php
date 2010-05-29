@@ -47,7 +47,7 @@ class Gwilym_KeyStore_File implements Gwilym_KeyStore_Interface
 	{
 		if ($dir === null)
 		{
-			$this->_dir = GWILYM_VAR_DIR . '/keystore';
+			$this->_dir = Gwilym_Config_KeyStore_File::$storage;
 		}
 		else
 		{
@@ -143,6 +143,10 @@ class Gwilym_KeyStore_File implements Gwilym_KeyStore_Interface
 	public function multiGet ($pattern)
 	{
 		$dir = dir($this->_dir);
+		if (!$dir) {
+			return false;
+		}
+
 		$results = array();
 		while ($file = $dir->read())
 		{
@@ -157,6 +161,7 @@ class Gwilym_KeyStore_File implements Gwilym_KeyStore_Interface
 
 			$results[$file] = $this->get($file);
 		}
+
 		return $results;
 	}
 
