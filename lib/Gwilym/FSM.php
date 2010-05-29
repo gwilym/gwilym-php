@@ -68,8 +68,12 @@ class Gwilym_FSM
 
 	public function stop ()
 	{
-		$this->_running = false;
+		if (!$this->_running) {
+			return;
+		}
+
 		$this->_state->leave();
+		$this->_running = false;
 		$this->_event->trigger($this, 'stop', $this);
 	}
 
