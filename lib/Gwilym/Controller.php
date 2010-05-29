@@ -55,6 +55,11 @@ abstract class Gwilym_Controller
 		return $this->_response;
 	}
 
+	public function getDefaultViewPath ($ext = 'php')
+	{
+		return str_replace('_', '/', str_replace('^Controller_', '', '^' . get_class($this))) . '.' . $ext;
+	}
+
 	/**
 	* By default, set a plain PHP view type which maps from Controller_Foo_Bar to /app/View/Foo/Bar.php. Individual or abstract controllers extending Gwilym_Controller can override this method to either set a new pattern or a single, specific template.
 	*
@@ -69,8 +74,7 @@ abstract class Gwilym_Controller
 
 		if ($this->_view === null)
 		{
-			$this->_view = str_replace('_', '/', str_replace('^Controller_', '', '^' . get_class($this)));
-			$this->_view = new Gwilym_View_Php($this->_view . '.php');
+			$this->_view = new Gwilym_View_Php($this->getDefaultViewPath());
 		}
 
 		return $this->_view;
