@@ -1,6 +1,6 @@
 <?php
 
-abstract class Gwilym_Controller
+abstract class Gwilym_Controller implements Gwilym_Controller_Interface
 {
 	/**
 	* Local access to view class for this controller.
@@ -19,20 +19,16 @@ abstract class Gwilym_Controller
 	*/
 	protected $_response;
 
-	/**
-	* To be defined by child classes implementing a croller.
-	*
-	* @param array $args arguments as provided by uri -> router pattern processing
-	*/
-	abstract public function action ($args);
+	protected $_args;
 
 	/**
 	* @param Gwilym_Request $request
 	* @return Gwilym_Controller
 	*/
-	public function __construct (Gwilym_Request $request)
+	public function __construct (Gwilym_Request $request, $args = array())
 	{
 		$this->_request = $request;
+		$this->_args = $args;
 	}
 
 	/**
