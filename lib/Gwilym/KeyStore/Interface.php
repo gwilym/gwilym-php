@@ -57,12 +57,12 @@ interface Gwilym_KeyStore_Interface
 	/**
 	* @throws Gwilym_KeyStore_Exception
 	*/
-	public function increment ($key, $value = null);
+	public function increment ($key, $value = 1);
 
 	/**
 	* @throws Gwilym_KeyStore_Exception
 	*/
-	public function decrement ($key, $value = null);
+	public function decrement ($key, $value = 1);
 
 	/**
 	* @throws Gwilym_KeyStore_Exception
