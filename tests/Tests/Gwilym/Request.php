@@ -10,7 +10,7 @@ class Gwilym_Request_Test extends Gwilym_Request
 
 class TestController_Transfer_From extends Gwilym_Controller
 {
-	public function action ($args)
+	public function action ()
 	{
 		Tests_Gwilym_Request::$testData = 2;
 		$this->request()->transfer('TestController_Transfer_To');
@@ -19,7 +19,7 @@ class TestController_Transfer_From extends Gwilym_Controller
 
 class TestController_Transfer_FromUri extends Gwilym_Controller
 {
-	public function action ($args)
+	public function action ()
 	{
 		Tests_Gwilym_Request::$testData = 2;
 		$this->request()->transfer('to');
@@ -28,7 +28,7 @@ class TestController_Transfer_FromUri extends Gwilym_Controller
 
 class TestController_Transfer_To extends Gwilym_Controller
 {
-	public function action ($args)
+	public function action ()
 	{
 		Tests_Gwilym_Request::$testData = 3;
 		$this->view(new Gwilym_View_None);
@@ -37,7 +37,7 @@ class TestController_Transfer_To extends Gwilym_Controller
 
 class TestController_Transfer_Loop extends Gwilym_Controller
 {
-	public function action ($args)
+	public function action ()
 	{
 		Tests_Gwilym_Request::$testData++;
 		$this->request()->transfer('TestController_Transfer_Loop');
