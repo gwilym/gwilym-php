@@ -25,11 +25,11 @@ class Gwilym_Route
 	public function follow ()
 	{
 		/** @var Gwilym_Controller */
-		$controller = new $this->_controller($this->_request);
+		$controller = new $this->_controller($this->_request, $this->_args);
 
 		if ($controller->before() !== false)
 		{
-			$controller->action($this->_args);
+			$controller->action();
 			$controller->after();
 		}
 
