@@ -11,16 +11,27 @@
  */
 class Gwilym_Event
 {
-	protected static $_instance;
+	protected static $_defaultInstance = null;
+	protected static $_instances = array();
 
 	/** @var support named instances etc. */
-	public static function factory ()
+	public static function factory (Gwilym_KeyStore_Interface $keystore = null, $name = null)
 	{
-		if (self::$_instance === null)
-		{
-			self::$_instance = new self;
+		if ($keystore === null) {
+			$keystore = Gwilym_KeyStore::factory();
 		}
-		return self::$_instance;
+
+		if ($name === null) {
+			if (self::$_defaultInstance === null) {
+				self::$_defaultInstance = new self($keystore);
+			}
+			return self::$_defaultInstance;
+		}
+
+		if (!isset(self::$_instances[$name])) {
+			self::$_instances[$name] = new self($keystore);
+		}
+		return self::$_instances[$name];
 	}
 
 	/**
@@ -30,6 +41,8 @@ class Gwilym_Event
 	*/
 	protected $_bindings = array();
 
+	protected $_name;
+
 	/**
 	* storage for whether an event has had persistent bindings loaded yet, in the format of event_id => bool
 	*
@@ -37,16 +50,15 @@ class Gwilym_Event
 	*/
 	protected $_loaded = array();
 
-	public function __construct (Gwilym_KeyStore_Interface $keystore = null)
+	public function __construct (Gwilym_KeyStore_Interface $keystore = null, $name = null)
 	{
-		if (func_num_args())
-		{
+		if ($keystore === null) {
+			$this->_keystore = Gwilym_KeyStore::factory();
+		} else {
 			$this->_keystore = $keystore;
 		}
-		else
-		{
-			$this->_keystore = Gwilym_KeyStore::factory();
-		}
+
+		$this->_name = $name;
 	}
 
 	/**
@@ -224,7 +236,7 @@ class Gwilym_Event
 			$this->_load($event);
 		}
 
-		$instance = new self;
+		$instance = new self($this->_keystore, $this->_name);
 		$instance->type($event);
 		$instance->data = $data;
 
