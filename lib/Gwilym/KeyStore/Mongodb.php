@@ -35,13 +35,18 @@ class Gwilym_KeyStore_Mongodb implements Gwilym_KeyStore_Interface
 		if ($this->_mongo_collection === null) {
 			$this->_mongo_collection = $this->_mongo->selectDB(Gwilym_Config_KeyStore_Mongodb::$database)->selectCollection(Gwilym_Config_KeyStore_Mongodb::$collection);
 		}
-		$this->_mongo->connect();
+		if (!$this->_mongo->connected) {
+			$this->_mongo->connect();
+		}
 		return $this->_mongo_collection;
 	}
 
 	public function __construct ()
 	{
-		$this->_mongo = new Mongo(Gwilym_Config_KeyStore_Mongodb::$server, false);
+		$this->_mongo = new Mongo(Gwilym_Config_KeyStore_Mongodb::$server, array(
+			'connect' => false,
+			'persist' => Gwilym_Config_KeyStore_Mongodb::$server,
+		));
 	}
 
 	/**
