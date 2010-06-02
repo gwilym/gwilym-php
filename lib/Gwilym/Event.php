@@ -84,7 +84,7 @@ class Gwilym_Event
 			return;
 		}
 
-		$bindings = $this->_keystore->multiGet('Gwilym_Event,' . $event . ',bind,*');
+		$bindings = $this->_keystore->multiGet('Gwilym_Event,bind,' . $event . ',*');
 
 		foreach ($bindings as $binding)
 		{
@@ -153,7 +153,7 @@ class Gwilym_Event
 			$callback = $callback[0] . '::' . $callback[1];
 		}
 
-		$this->_keystore->set('Gwilym_Event,' . $event . ',bind,' . md5($callback), $callback);
+		$this->_keystore->set('Gwilym_Event,bind,' . $event . ',' . md5($callback), $callback);
 	}
 
 	/**
@@ -206,7 +206,7 @@ class Gwilym_Event
 			$callback = $callback[0] . '::' . $callback[1];
 		}
 
-		$this->_keystore->delete('Gwilym_Event,' . $event . ',bind,' . md5($callback));
+		$this->_keystore->delete('Gwilym_Event,bind,' . $event . ',' . md5($callback));
 	}
 
 	/**
