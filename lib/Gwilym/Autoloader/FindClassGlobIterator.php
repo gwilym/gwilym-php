@@ -4,10 +4,10 @@ class Gwilym_Autoloader_FindClassGlobIterator extends GlobIterator
 {
 	protected $_base;
 
-	public function __construct ($base, $pattern, $flags = 0)
+	public function __construct ($base, $pattern)
 	{
 		$this->_base = $base;
-		parent::__construct($base . $pattern, $flags);
+		parent::__construct($base . $pattern, FilesystemIterator::CURRENT_AS_PATHNAME | FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::SKIP_DOTS | FilesystemIterator::UNIX_PATHS);
 	}
 
 	/**
@@ -20,9 +20,14 @@ class Gwilym_Autoloader_FindClassGlobIterator extends GlobIterator
 		return str_replace('/', '_', substr($path, 1, strlen($path) - 5)); // 5 being the length of '.php' plus a leading '/'
 	}
 
+	public function key ()
+	{
+		return $this->current();
+	}
+
 	/** @return string */
 	public function current ()
 	{
-		return self::pathToClassName(substr(str_replace('\\', '/', parent::current()), strlen($this->_base)));
+		return self::pathToClassName(substr(parent::current(), strlen($this->_base)));
 	}
 }
