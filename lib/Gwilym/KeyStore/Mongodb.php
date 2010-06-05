@@ -3,7 +3,7 @@
 /**
 * Implementation of keystore class using this PECL mongodb driver. Note that this doesn't use advanced mongodb features for atomicity so maybe this could be improved depending on usage.
 */
-class Gwilym_KeyStore_Mongodb implements Gwilym_KeyStore_Interface
+class Gwilym_KeyStore_Mongodb extends Gwilym_KeyStore implements Gwilym_KeyStore_Interface
 {
 	public static function patternToRegularExpresion ($pattern)
 	{

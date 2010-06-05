@@ -3,7 +3,7 @@
 /**
 * Implementation of keystore class using files. For development purposes only.
 */
-class Gwilym_KeyStore_File implements Gwilym_KeyStore_Interface
+class Gwilym_KeyStore_File extends Gwilym_KeyStore implements Gwilym_KeyStore_Interface
 {
 	/**
 	* List of characters disallowed as key names when this implementation is used.
