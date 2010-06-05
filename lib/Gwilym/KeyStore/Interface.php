@@ -68,4 +68,19 @@ interface Gwilym_KeyStore_Interface
 	* @throws Gwilym_KeyStore_Exception
 	*/
 	public function append ($key, $value);
+
+	/**
+	* Define (or get) the prefix to use for all key operations on this keystore instance.
+	*
+	* @param string $prefix
+	* @return mixed if $prefix is null, return the current prefix, otherwise return true if the prefix was changed or false if the prefix was not changed due to it being locked
+	*/
+	public function prefix ($prefix = null);
+
+	/**
+	* Call this to lock the prefix to it's current value to prevent accidental altering of the prefix value.
+	*
+	* @return void
+	*/
+	public function lockPrefix ();
 }
