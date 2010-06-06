@@ -37,15 +37,40 @@ class Tests_Gwilym_KeyStore_Base extends UnitTestCase
 		$this->assertEqual('cd', $this->ks->get('test_cd'));
 		$this->assertEqual('de', $this->ks->get('test_de'));
 
-		$get = $this->ks->multiGet('test_??');
+		$get = iterator_to_array($this->ks->multiGet('test_??'), true);
 
 		$this->assertEqual($set, $get);
 
 		$this->assertTrue($this->ks->multiDelete('test_??'));
 
-		$get = $this->ks->multiGet('test_??');
+		$get = iterator_to_array($this->ks->multiGet('test_??'), true);
 
 		$this->assertEqual(array(), $get);
+	}
+
+	public function testMultiDelete ()
+	{
+		$this->assertTrue($this->ks->multiDelete('test_??'));
+
+		$set = array(
+			'test_ab' => 'ab',
+			'test_bc' => 'bc',
+			'test_cd' => 'cd',
+			'test_de' => 'de',
+		);
+
+		$this->assertTrue($this->ks->multiSet($set));
+
+		$this->assertTrue($this->ks->multiDelete('test_[bc]?'));
+
+		$get = iterator_to_array($this->ks->multiGet('test_??'), true);
+
+		$expected = array(
+			'test_ab' => 'ab',
+			'test_de' => 'de',
+		);
+
+		$this->assertEqual($expected, $get);
 	}
 
 	public function testIncrement ()
