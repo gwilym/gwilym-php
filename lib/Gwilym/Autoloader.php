@@ -19,7 +19,7 @@ class Gwilym_Autoloader
 	*
 	* For portability, this is case-sentive, and brace patterns such as {a,b,c} may not available.
 	*
-	* @param string $pattern Glob-like pattern string, such as Gwilym_Cms_Plugins_*_Plugin, to obtain a list of all available cms plugins
+	* @param string $pattern Glob-like pattern string, such as Gwilym_Plugins_*_Plugin, to obtain a list of all available plugins
 	* @return Traversable results if successful, empty array for no results, or false on error
 	*/
 	public static function findClasses ($pattern)
