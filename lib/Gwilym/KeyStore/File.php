@@ -23,24 +23,6 @@ class Gwilym_KeyStore_File extends Gwilym_KeyStore implements Gwilym_KeyStore_In
 		"\0"
 	);
 
-	public static function patternToRegularExpresion ($pattern)
-	{
-		// todo: this is really basic and needs improving
-
-		$pattern = strtr($pattern, array(
-			'*' => '.*',
-			'?' => '.{1}',
-		));
-
-		return '#^' . $pattern . '$#';
-	}
-
-	public static function testFilenameAgainstPattern ($filename, $pattern)
-	{
-		$pattern = self::patternToRegularExpresion($pattern);
-		return (bool)preg_match($pattern, $filename);
-	}
-
 	protected $_dir;
 
 	public function __construct ($dir = null)
@@ -142,46 +124,15 @@ class Gwilym_KeyStore_File extends Gwilym_KeyStore implements Gwilym_KeyStore_In
 
 	public function multiGet ($pattern)
 	{
-		$dir = dir($this->_dir);
-		if (!$dir) {
-			return false;
-		}
-
-		$results = array();
-		while ($file = $dir->read())
-		{
-			if ($file == '.' || $file == '..')
-			{
-				continue;
-			}
-			if (!self::testFilenameAgainstPattern($file, $pattern))
-			{
-				continue;
-			}
-
-			$results[$file] = $this->get($file);
-		}
-
-		return $results;
+		return new Gwilym_KeyStore_File_GlobIterator($this->_dir . '/' . $pattern);
 	}
 
 	public function multiDelete ($pattern)
 	{
-		$dir = dir($this->_dir);
+		$glob = new GlobIterator($this->_dir . '/' . $pattern, FilesystemIterator::KEY_AS_FILENAME | FilesystemIterator::CURRENT_AS_PATHNAME | FilesystemIterator::SKIP_DOTS | FilesystemIterator::UNIX_PATHS);
 
-		while ($file = $dir->read())
-		{
-			if ($file == '.' || $file == '..')
-			{
-				continue;
-			}
-			if (!self::testFilenameAgainstPattern($file, $pattern))
-			{
-				continue;
-			}
-
-			if (!$this->delete($file))
-			{
+		foreach ($glob as $pathname) {
+			if (!unlink($pathname)) {
 				return false;
 			}
 		}
