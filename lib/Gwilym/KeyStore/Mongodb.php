@@ -129,9 +129,7 @@ class Gwilym_KeyStore_Mongodb extends Gwilym_KeyStore implements Gwilym_KeyStore
 		return $this->_collection()->batchInsert($batch);
 	}
 
-	/**
-	* @throws Gwilym_KeyStore_Exception
-	*/
+	/** @return Iterator */
 	public function multiGet ($pattern)
 	{
 		$cursor = $this->_collection()->find(self::patternToQuery($pattern), array('value'));
@@ -139,11 +137,7 @@ class Gwilym_KeyStore_Mongodb extends Gwilym_KeyStore implements Gwilym_KeyStore
 			return false;
 		}
 
-		$results = array();
-		while ($result = $cursor->getNext()) {
-			$results[$result['_id']] = $result['value'];
-		}
-		return $results;
+		return new Gwilym_KeyStore_Mongodb_CursorIterator($cursor);
 	}
 
 	/**
