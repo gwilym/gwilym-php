@@ -29,6 +29,7 @@ abstract class Gwilym_Controller implements Gwilym_Controller_Interface
 	{
 		$this->_request = $request;
 		$this->_args = $args;
+		$this->_response = new Gwilym_Response;
 	}
 
 	/**
