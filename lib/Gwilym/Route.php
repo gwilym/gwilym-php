@@ -27,6 +27,23 @@ class Gwilym_Route
 		/** @var Gwilym_Controller */
 		$controller = new $this->_controller($this->_request, $this->_args);
 
+		if ($controller instanceof Gwilym_Controller_MethodSpecific) {
+			$method = $this->_request->method();
+			$response = $controller->response();
+
+			if ($controller instanceof Gwilym_Controller_PostOnly && $method !== 'POST') {
+				$response->status(Gwilym_Response::STATUS_METHOD_NOT_ALLOWED);
+				$response->header('Allow', 'POST');
+				$response->end();
+			}
+
+			if ($controller instanceof Gwilym_Controller_GetOnly && $method !== 'GET') {
+				$response->status(Gwilym_Response::STATUS_METHOD_NOT_ALLOWED);
+				$response->header('Allow', 'GET');
+				$response->end();
+			}
+		}
+
 		if ($controller->before() !== false)
 		{
 			$controller->action();
