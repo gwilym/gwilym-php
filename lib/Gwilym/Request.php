@@ -46,6 +46,11 @@ class Gwilym_Request
 		$this->_routers[] = $router;
 	}
 
+	public function method ()
+	{
+		return strtoupper($_SERVER['REQUEST_METHOD']);
+	}
+
 	public function handle ()
 	{
 		$transfer = null;
