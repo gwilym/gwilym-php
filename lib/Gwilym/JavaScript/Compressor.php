@@ -6,7 +6,7 @@ class Gwilym_JavaScript_Compressor extends Gwilym_JavaScript_Parser
 	protected $_output;
 	protected $_outputOpener;
 
-	protected $_previousToken  = array(self::T_SEMICOLON, ''); // dummy entry
+	protected $_previousToken  = array(self::T_UNKNOWN, ''); // dummy entry
 	protected $_currentToken;
 	protected $_nextToken;
 
@@ -44,6 +44,17 @@ class Gwilym_JavaScript_Compressor extends Gwilym_JavaScript_Parser
 					// ignore duplicate semicolons
 					return;
 				}
+
+				if ($this->_nextToken === null) {
+					// ignore semicolon at end of file
+					return;
+				}
+
+				switch ($this->_nextToken[0]) {
+					case self::T_CLOSE_BRACE:
+						// ignore semicolons before closing }
+						return;
+				}
 				break;
 
 			case self::T_WHITESPACE:
@@ -80,17 +91,11 @@ class Gwilym_JavaScript_Compressor extends Gwilym_JavaScript_Parser
 				break;
 
 			case self::T_NEWLINE:
-				switch ($this->_previousToken[0]) {
-					case self::T_NEWLINE:
-						// ignore consecutive newlines
-						return;
-				}
-
-				// if newslines are to be sent, reduce it to 1 newline
-				$this->_currentToken[1] = "\n";
-				break;
+				// for now, drop all newlines - assuming input js is well-formed
+				return;
 		}
 
+//		fwrite($this->_output, '[' . $this->_currentToken[0] . ':' . $this->_currentToken[1] . ']');
 		fwrite($this->_output, $this->_currentToken[1]);
 		$this->_previousToken = $this->_currentToken;
 	}
