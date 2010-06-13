@@ -1,21 +1,28 @@
 <?php
 
+/**
+* Implements the base of a finite state machine / state executor in PHP. Extend on this base class to implement specific functionality.
+*/
 abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 {
+	/** @var bool whether the fsm is started (running) or not */
 	protected $_started = false;
-	protected $_pause = false;
-	protected $_payload = array();
-	protected $_states;
-	protected $_state;
-	protected $_nextstate;
 
+	/** @var array set of state -> transition data */
+	protected $_states;
+
+	/** @var string name of current state */
+	protected $_state;
+
+	/** @return array function for extendees to return a set of data for storing in _states */
 	abstract protected function _getStates ();
 
 	public function __construct ()
 	{
-		// reserved
+		// reserved for extendees
 	}
 
+	/** @var starts the finite state machine, if not already started */
 	public function start ()
 	{
 		if ($this->_started) {
@@ -23,58 +30,89 @@ abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 		}
 
 		$this->_started = true;
-
+		$this->_state = null;
 		$this->_states = $this->_getStates();
-		reset($this->_states);
-		$this->_nextstate = key($this->_states);
 
-		while ($this->_nextstate && !$this->_pause) {
-			$this->step();
+		while ($this->_state = $this->step()) {
+			// just loop until stopped
 		}
-
-		return;
 	}
 
-	public function step ()
+	/** @return string returns the next state based on the current state and current conditions, or null if there is no next suitable state */
+	protected function _getNextState ()
 	{
-		if (is_array($this->_nextstate)) {
-			foreach ($this->_nextstate as $next) {
-				if (is_string($next)) {
-					$this->_state = $next;
-					break;
-				}
+		if ($this->_state === null) {
+			// first iteration, pick first state and return
+			reset($this->_states);
+			return key($this->_states);
+		}
 
-				if (!$this->{'_' . $next['on']}()) {
-					continue;
-				}
+		$transitions = $this->_states[$this->_state];
 
-//				echo " > " . $next['on'] . "\n";
-				$this->_state = $next['goto'];
-				break;
-			}
-		} else if (is_string($this->_nextstate)) {
-			$this->_state = $this->_nextstate;
-		} else {
-			$this->_state = null;
-			$this->_nextstate = null;
-			$this->stop();
+		if ($transitions === null) {
+			// end of transition list
 			return;
 		}
 
-//		echo $this->_state . "\n";
-		$method = '_' . $this->_state;
+		if (is_string($transitions)) {
+			// direct transition
+			return $transitions;
+		}
+
+		if (is_array($transitions)) {
+			// conditional transition
+			foreach ($transitions as $next) {
+				if (is_string($next)) {
+					// default transition, usually found after one or more conditionals
+					return $next;
+				}
+
+				if (!$this->{'_' . $next['on']}()) {
+					// condition not met
+					continue;
+				}
+
+				return $next['goto'];
+			}
+		}
+	}
+
+	/**
+	* If started, steps through the machine's state once
+	*
+	* @return string the new current state name, that is, the state that was just executed by this call to step()
+	*/
+	public function step ()
+	{
+		if (!$this->_started) {
+			return;
+		}
+
+		$state = $this->_getNextState();
+
+		if (!$state) {
+			return;
+		}
+
+		$method = '_' . $state;
 		if (method_exists($this, $method)) {
 			$this->$method();
 		}
 
-		$this->_nextstate = $this->_states[$this->_state];
+		return $state;
 	}
 
+	/** @return bool true if started otherwise false */
 	public function started ()
 	{
 		return $this->_started;
 	}
 
+	/**
+	* If started, stops the current state machine, forgetting current-state information
+	*
+	* @return void
+	*/
 	public function stop ()
 	{
 		if (!$this->_started) {
@@ -82,15 +120,6 @@ abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 		}
 
 		$this->_started = false;
-	}
-
-	public function pause ()
-	{
-		$this->_pause = true;
-	}
-
-	public function resume ()
-	{
-		$this->_pause = false;
+		$this->_state = null;
 	}
 }
