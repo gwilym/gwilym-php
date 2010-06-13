@@ -60,6 +60,34 @@ class Gwilym_JavaScript_Parser extends Gwilym_FSM_StreamParser
 	const T_RETURN = 55;
 	const T_NUMBER_INT_EXPONENTIAL = 56;
 	const T_NUMBER_FLOAT_EXPONENTIAL = 57;
+	const T_IF = 58;
+	const T_ELSE = 59;
+	const T_ELSE_IF = 60;
+	const T_IN = 61;
+	const T_TYPEOF = 62;
+	const T_BREAK = 63;
+	const T_CASE = 64;
+	const T_CONTINUE = 65;
+	const T_DEFAULT = 66;
+	const T_DELETE = 67;
+	const T_DO = 68;
+	const T_EXPORT = 69;
+	const T_COMMENT = 70;
+	const T_FOR = 71;
+	const T_IMPORT = 72;
+	const T_LABEL = 73;
+	const T_NEW = 74;
+	const T_SWITCH = 75;
+	const T_THIS = 76;
+	const T_VOID = 77;
+	const T_WHILE = 78;
+	const T_WITH = 79;
+	const T_CONST = 80;
+	const T_TRY = 81;
+	const T_CATCH = 82;
+	const T_THROW = 83;
+	const T_FINALLY = 84;
+	const T_INSTANCEOF = 85;
 
 	protected function _getStates ()
 	{
@@ -103,7 +131,7 @@ class Gwilym_JavaScript_Parser extends Gwilym_FSM_StreamParser
 	protected $_buffer;
 	protected $_token;
 
-	/* @var array storage for a memory of tokens which have just been parsed, which assists with detected regex and arithmetic tokens based on preceeding tokens */
+	/** @var array storage for a memory of tokens which have just been parsed, which assists with detected regex and arithmetic tokens based on preceeding tokens */
 	protected $_statement;
 	protected $_stack;
 	protected $_push;
@@ -207,7 +235,6 @@ class Gwilym_JavaScript_Parser extends Gwilym_FSM_StreamParser
 		self::T_STRING_DQ => true,
 		self::T_STRING_SQ => true,
 		self::T_REGEX => true,
-		self::T_VAR => true,
 	);
 
 	protected $_pushTokens = array(
@@ -233,6 +260,34 @@ class Gwilym_JavaScript_Parser extends Gwilym_FSM_StreamParser
 		'var' => self::T_VAR,
 		'undefined' => self::T_UNDEFINED,
 		'return' => self::T_RETURN,
+		'if' => self::T_IF,
+		'else' => self::T_ELSE,
+		'else if' => self::T_ELSE_IF,
+		'in' => self::T_IN,
+		'typeof' => self::T_TYPEOF,
+		'break' => self::T_BREAK,
+		'case' => self::T_CASE,
+		'continue' => self::T_CONTINUE,
+		'default' => self::T_DEFAULT,
+		'delete' => self::T_DELETE,
+		'do' => self::T_DO,
+		'export' => self::T_EXPORT,
+		'comment' => self::T_COMMENT,
+		'for' => self::T_FOR,
+		'import' => self::T_IMPORT,
+		'label' => self::T_LABEL,
+		'new' => self::T_NEW,
+		'switch' => self::T_SWITCH,
+		'this' => self::T_THIS,
+		'void' => self::T_VOID,
+		'while' => self::T_WHILE,
+		'with' => self::T_WITH,
+		'const' => self::T_CONST,
+		'try' => self::T_TRY,
+		'catch' => self::T_CATCH,
+		'throw' => self::T_THROW,
+		'finally' => self::T_FINALLY,
+		'instanceof' => self::T_INSTANCEOF,
 	);
 
 	/** @var string list of valid, non-newline whitespace chars between real tokens (not inside strings) */
@@ -537,7 +592,7 @@ class Gwilym_JavaScript_Parser extends Gwilym_FSM_StreamParser
 			$this->_char = null;
 		}
 
-		echo "EOT" . ($this->_greedy ? "G" : "") . ":" . $this->_token . "> " . $this->_buffer . "\n";
+//		echo "EOT" . ($this->_greedy ? "G" : "") . ":" . $this->_token . "> " . $this->_buffer . "\n";
 
 		$this->_tokenFinalised();
 
