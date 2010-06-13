@@ -25,7 +25,7 @@ class Gwilym_JavaScript_Parser extends Gwilym_FSM_StreamParser
 	const T_SEMICOLON = 20;
 	const T_COMMA = 21;
 	const T_VAR = 22;
-	const T_COLON = 22;
+	const T_COLON = 25;
 	const T_OPEN_BRACKET = 23;
 	const T_CLOSE_BRACKET = 24;
 	const T_NUMBER_INT = 26;
@@ -88,6 +88,7 @@ class Gwilym_JavaScript_Parser extends Gwilym_FSM_StreamParser
 	const T_THROW = 83;
 	const T_FINALLY = 84;
 	const T_INSTANCEOF = 85;
+	const T_OPER_ASSIGN_BW_OR = 86;
 
 	protected function _getStates ()
 	{
@@ -208,6 +209,7 @@ class Gwilym_JavaScript_Parser extends Gwilym_FSM_StreamParser
 		"*="	=> self::T_OPER_ASSIGN_MULTIPLICATION,
 		"/"		=> self::T_OPER_DIVISION,
 		"/="	=> self::T_OPER_ASSIGN_DIVISION,
+		"|="	=> self::T_OPER_ASSIGN_BW_OR,
 	);
 
 	/** @var array a list of tokens which are both single characters and cannot be shared with the start of other tokens, so don't need to be checked further */
@@ -326,6 +328,42 @@ class Gwilym_JavaScript_Parser extends Gwilym_FSM_StreamParser
 	protected function _isKnownToken ()
 	{
 		return $this->_token !== self::T_UNKNOWN;
+	}
+
+	protected function _isTokenOper ($token)
+	{
+		switch ($token) {
+			case self::T_OPER_ASSIGN:
+			case self::T_OPER_EQ:
+			case self::T_OPER_EQ_STRICT:
+			case self::T_OPER_NEQ:
+			case self::T_OPER_NEQ_STRICT:
+			case self::T_OPER_NOT:
+			case self::T_OPER_LT:
+			case self::T_OPER_LTE:
+			case self::T_OPER_BW_LSHIFT:
+			case self::T_OPER_GT:
+			case self::T_OPER_GTE:
+			case self::T_OPER_BW_RSHIFT:
+			case self::T_OPER_BW_ZFRSHIFT:
+			case self::T_OPER_BW_OR:
+			case self::T_OPER_OR:
+			case self::T_OPER_BW_OR:
+			case self::T_OPER_OR:
+			case self::T_OPER_ADDITION:
+			case self::T_OPER_INCREMENT:
+			case self::T_OPER_ASSIGN_ADDITION:
+			case self::T_OPER_SUBTRACT:
+			case self::T_OPER_DECREMENT:
+			case self::T_OPER_ASSIGN_DECREMENT:
+			case self::T_OPER_MULTIPLICATION:
+			case self::T_OPER_ASSIGN_MULTIPLICATION:
+			case self::T_OPER_DIVISION:
+			case self::T_OPER_ASSIGN_DIVISION:
+			case self::T_OPER_ASSIGN_BW_OR:
+				return true;
+		}
+		return false;
 	}
 
 	protected function _read ()
