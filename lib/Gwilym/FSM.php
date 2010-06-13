@@ -1,122 +1,96 @@
 <?php
 
-/**
-* e.g.
-*
-*	$fsm = new Gwilym_FSM();
-*
-*	$fsm
-*		->state('loop')
-*			->defaultTransition('loop')
-*			->transition('99', 'end')
-*		->state('end')
-*			->stop(true);
-*
-*	$fsm->start();
-*
-*	$i = 0;
-*	while (++$i && $fsm->running()) {
-*		$fsm->input($i);
-*	}
-*
-* 	$this->assertEqual(99, $i);
-*
-*/
-class Gwilym_FSM
+abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 {
-	/** @var Gwilym_FSM_State */
-	protected $_state;
-
-	/** @var Gwilym_FSM_State */
-	protected $_initial;
-
-	/** @var Array<Gwilym_FSM_State> */
+	protected $_started = false;
+	protected $_pause = false;
+	protected $_payload = array();
 	protected $_states;
+	protected $_state;
+	protected $_nextstate;
 
-	/** @var bool */
-	protected $_running = false;
-
-	protected $_payload;
-
-	/** @var Gwilym_Event */
-	protected $_event;
+	abstract protected function _getStates ();
 
 	public function __construct ()
 	{
-		$this->_event = Gwilym_Event::factory();
+		// reserved
 	}
 
-	public function start ($payload = null)
+	public function start ()
 	{
-		if ($this->_running) {
+		if ($this->_started) {
 			return;
 		}
 
-		$this->_payload = $payload;
-		$this->_running = true;
-		$this->_state = $this->_initial;
+		$this->_started = true;
 
-		$this->_event->trigger($this, 'start', $this);
+		$this->_states = $this->_getStates();
+		reset($this->_states);
+		$this->_nextstate = key($this->_states);
 
-		$this->_state->enter();
+		while ($this->_nextstate && !$this->_pause) {
+			$this->step();
+		}
+
+		return;
 	}
 
-	public function running ()
+	public function step ()
 	{
-		return $this->_running;
+		if (is_array($this->_nextstate)) {
+			foreach ($this->_nextstate as $next) {
+				if (is_string($next)) {
+					$this->_state = $next;
+					break;
+				}
+
+				if (!$this->{'_' . $next['on']}()) {
+					continue;
+				}
+
+//				echo " > " . $next['on'] . "\n";
+				$this->_state = $next['goto'];
+				break;
+			}
+		} else if (is_string($this->_nextstate)) {
+			$this->_state = $this->_nextstate;
+		} else {
+			$this->_state = null;
+			$this->_nextstate = null;
+			$this->stop();
+			return;
+		}
+
+//		echo $this->_state . "\n";
+		$method = '_' . $this->_state;
+		if (method_exists($this, $method)) {
+			$this->$method();
+		}
+
+		$this->_nextstate = $this->_states[$this->_state];
+	}
+
+	public function started ()
+	{
+		return $this->_started;
 	}
 
 	public function stop ()
 	{
-		if (!$this->_running) {
+		if (!$this->_started) {
 			return;
 		}
 
-		$this->_state->leave();
-		$this->_running = false;
-		$this->_event->trigger($this, 'stop', $this);
+		$this->_started = false;
 	}
 
-	public function input ($symbol)
+	public function pause ()
 	{
-		if (!$this->_running) {
-			return false;
-		}
-
-		$transition = $this->_state->transition($symbol);
-		if (!$transition) {
-			$transition = $this->_state->defaultTransition();
-		}
-
-		if (!$transition) {
-			return false;
-		}
-
-		if ($transition->execute() === false) {
-			return false;
-		}
-
-		$this->_state->leave();
-		$this->_state = $transition->to();
-		$this->_state->enter();
+		$this->_pause = true;
 	}
 
-	public function state ($name = null)
+	public function resume ()
 	{
-		if (func_num_args() === 0) {
-			if (!$this->_running) {
-				return false;
-			}
-			return $this->_state;
-		}
-
-		if (!isset($this->_states[$name])) {
-			$this->_states[$name] = new Gwilym_FSM_State($this, $name);
-			if (!$this->_initial) {
-				$this->_initial = $this->_states[$name];
-			}
-		}
-
-		return $this->_states[$name];
+		$this->_pause = false;
 	}
 }
