@@ -25,17 +25,38 @@ class Gwilym_Request
 	/** @var Gwilym_UriParser */
 	protected $_uriParser;
 
-	/** @var array<mixed> storage for original get data */
+	/** @var Gwilym_Response */
+	protected $_response;
+
+	/** @var array<mixed> storage for original $_GET data */
 	private $_get;
 
-	/** @var array<mixed> storage for original post data */
+	/** @var array<mixed> storage for original $_POST data */
 	private $_post;
 
-	/** @var array<mixed> storage for original cookie data */
+	/** @var array<mixed> storage for original $_COOKIE data */
 	private $_cookie;
 
 	/** @var array<mixed> storage for original session data, note: this is handled by reference so Gwilym_Request's $_session is just a reference to $_SESSION */
 	private $_session = null;
+
+	/** @var array<mixed> storage for original $_SERVER data */
+	private $_server;
+
+	/**
+	* Calling this ensures the session has been started
+	*
+	* @return bool true if session was started otherwise false if session was already started previously
+	*/
+	protected function _startSession ()
+	{
+		if ($this->_session === null) {
+			session_start();
+			$this->_session = &$_SESSION;
+			return true;
+		}
+		return false;
+	}
 
 	/**
 	* @param string $uri URI for this request, or leave as null to determine based on user-agent-supplied data
@@ -43,9 +64,10 @@ class Gwilym_Request
 	* @param array $post POST fields for this request, or leave as null to use user-agent-supplied data
 	* @param array $cookie COOKIE fields for this request, or leave as null to use user-agent-supplied data
 	* @param array $session SESSION fields for this request (supplying this will prevent real session interaction), or leave as null to use a real PHP session
+	* @param array $server SERVER fields for this request, or leave as null to use user-agent- & server-api-supplied data
 	* @return Gwilym_Request
 	*/
-	public function __construct ($uri = null, $get = null, $post = null, $cookie = null, $session = null)
+	public function __construct ($uri = null, $get = null, $post = null, $cookie = null, $session = null, $server = null)
 	{
 		if ($uri !== null) {
 			$this->uriParser(new Gwilym_UriParser_Fixed('', $uri));
@@ -55,6 +77,7 @@ class Gwilym_Request
 		$this->_post = $post === null ? $_POST : $post;
 		$this->_cookie = $cookie === null ? $_COOKIE : $cookie;
 		$this->_session = $session;
+		$this->_server = $server === null ? $_SERVER : $server;
 	}
 
 	/**
@@ -219,7 +242,7 @@ class Gwilym_Request
 	}
 
 	/**
-	* Wrapper for original $_COOKIE data. Read only.
+	* Wrapper for original $_COOKIE data. Read only. (todo: should be read/write)
 	*
 	* @param string|null $key null if specified key does not exist, otherwise returns original value as supplied by user agent (most likely a string)
 	*/
@@ -237,15 +260,36 @@ class Gwilym_Request
 	*/
 	public function session ($key, $value = null)
 	{
-		if ($this->_session === null) {
-			session_start();
-			$this->_session = &$_SESSION;
-		}
-
+		$this->_startSession();
 		if (func_num_args() == 2) {
 			$this->_session[$key] = $value;
 			return $this;
 		}
 		return isset($this->_session[$key]) ? $this->_session[$key] : null;
+	}
+
+	public function sessionId ()
+	{
+		$this->_startSession();
+		return session_id();
+	}
+
+	/** @var Gwilym_Response */
+	public function response ()
+	{
+		if ($this->_response === null) {
+			$this->_response = new Gwilym_Response($this);
+		}
+		return $this->_response;
+	}
+
+	/**
+	* Wrapper for original $_SERVER data. Read only.
+	*
+	* @param string|null $key null if specified key does not exist, otherwise returns original value as supplied by user agent / server api (most likely a string)
+	*/
+	public function server ($key)
+	{
+		return isset($this->_server[$key]) ? $this->_server[$key] : null;
 	}
 }
