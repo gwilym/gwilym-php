@@ -10,6 +10,20 @@ class Gwilym_ArrayObject_TrackChanged extends ArrayObject
 	/** @var bool true if any elements have changed */
 	protected $_dirty = false;
 
+	/**
+	* Set dirty flag
+	*
+	* @return bool true if flag was changed, otherwise false (ie. flag already set)
+	*/
+	protected function _setDirty ()
+	{
+		if ($this->_dirty) {
+			return false;
+		}
+
+		return $this->_dirty = true;
+	}
+
 	/** @return bool true if any elements have changed */
 	public function dirty ()
 	{
@@ -19,11 +33,16 @@ class Gwilym_ArrayObject_TrackChanged extends ArrayObject
 	/**
 	* Clear dirty flag
 	*
-	* @return void
+	* @return bool true if flag was changed, otherwise false (ie. flag already cleared)
 	*/
 	public function clearDirty ()
 	{
+		if (!$this->_dirty) {
+			return false;
+		}
+
 		$this->_dirty = false;
+		return true;
 	}
 
 	/**
@@ -44,7 +63,7 @@ class Gwilym_ArrayObject_TrackChanged extends ArrayObject
 	*/
 	public function asort ()
 	{
-		$this->_dirty = true;
+		$this->_setDirty();
 		return parent::asort();
 	}
 
@@ -56,7 +75,7 @@ class Gwilym_ArrayObject_TrackChanged extends ArrayObject
 	*/
 	public function exchangeArray ($input)
 	{
-		$this->_dirty = true;
+		$this->_setDirty();
 		return parent::exchangeArray($input);
 	}
 
@@ -66,7 +85,7 @@ class Gwilym_ArrayObject_TrackChanged extends ArrayObject
 	*/
 	public function ksort ()
 	{
-		$this->_dirty = true;
+		$this->_setDirty();
 		return parent::ksort();
 	}
 
@@ -76,7 +95,7 @@ class Gwilym_ArrayObject_TrackChanged extends ArrayObject
 	*/
 	public function natcasesort ()
 	{
-		$this->_dirty = true;
+		$this->_setDirty();
 		return parent::natcasesort();
 	}
 
@@ -86,7 +105,7 @@ class Gwilym_ArrayObject_TrackChanged extends ArrayObject
 	*/
 	public function natsort ()
 	{
-		$this->_dirty = true;
+		$this->_setDirty();
 		return parent::natsort();
 	}
 
@@ -99,7 +118,7 @@ class Gwilym_ArrayObject_TrackChanged extends ArrayObject
 	*/
 	public function offsetSet ($index, $newval)
 	{
-		$this->_dirty = true;
+		$this->_setDirty();
 		return parent::offsetSet($index, $newval);
 	}
 
@@ -111,7 +130,7 @@ class Gwilym_ArrayObject_TrackChanged extends ArrayObject
 	*/
 	public function offsetUnset ($index)
 	{
-		$this->_dirty = true;
+		$this->_setDirty();
 		return parent::offsetUnset($index);
 	}
 
@@ -123,7 +142,7 @@ class Gwilym_ArrayObject_TrackChanged extends ArrayObject
 	*/
 	public function uasort ($cmp_function)
 	{
-		$this->_dirty = true;
+		$this->_setDirty();
 		return parent::uasort($cmp_function);
 	}
 
@@ -135,7 +154,7 @@ class Gwilym_ArrayObject_TrackChanged extends ArrayObject
 	*/
 	public function uksort ($cmp_function)
 	{
-		$this->_dirty = true;
+		$this->_setDirty();
 		return parent::uksort($cmp_function);
 	}
 
@@ -146,7 +165,7 @@ class Gwilym_ArrayObject_TrackChanged extends ArrayObject
 	*/
 	public function unserialize ($serialize)
 	{
-		$this->_dirty = true;
+		$this->_setDirty();
 		return parent::unserialize($serialize);
 	}
 }
