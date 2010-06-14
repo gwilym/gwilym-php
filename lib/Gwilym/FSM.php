@@ -19,7 +19,7 @@ abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 
 	public function __construct ()
 	{
-		// reserved for extendees
+		$this->_states = $this->_getStates();
 	}
 
 	/** @var starts the finite state machine, if not already started */
@@ -31,7 +31,6 @@ abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 
 		$this->_started = true;
 		$this->_state = null;
-		$this->_states = $this->_getStates();
 
 		while ($this->step()) {
 			// just loop until stopped
