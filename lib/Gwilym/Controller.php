@@ -14,11 +14,6 @@ abstract class Gwilym_Controller implements Gwilym_Controller_Interface
 	*/
 	protected $_request;
 
-	/**
-	* @var Gwilym_Response
-	*/
-	protected $_response;
-
 	protected $_args;
 
 	/**
@@ -29,7 +24,6 @@ abstract class Gwilym_Controller implements Gwilym_Controller_Interface
 	{
 		$this->_request = $request;
 		$this->_args = $args;
-		$this->_response = new Gwilym_Response;
 	}
 
 	/**
@@ -40,16 +34,6 @@ abstract class Gwilym_Controller implements Gwilym_Controller_Interface
 	public function request ()
 	{
 		return $this->_request;
-	}
-
-	/**
-	* Response object for directly controlling output to the user-agent
-	*
-	* @return Gwilym_Response
-	*/
-	public function response ()
-	{
-		return $this->_response;
 	}
 
 	public function getDefaultViewPath ($ext = 'php')
