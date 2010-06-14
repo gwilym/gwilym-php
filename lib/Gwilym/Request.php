@@ -1,79 +1,127 @@
 <?php
 
+/**
+* Request handler.
+*
+* When provided with user-agent data and routers, can resolve a request to a route pointing to a controller and dispatch down that route.
+*/
 class Gwilym_Request
 {
+	/** @var int max allowed nesting (transfer) depth before Gwilym_Request_Exception_TooManyTransfers is thrown */
 	const MAX_NESTING_DEPTH = 20;
 
 	/**
 	* Calls to handle() may eventually make another call to handle() if transfer() is called. This value controls the maximum amount of times handle() can be called for one instance.
 	*
+	* This value starts at MAX_NESTING_DEPTH and counts down to 0, at which time a Gwilym_Request_Exception_TooManyTransfers exception will be thrown.
+	*
 	* @var int
 	*/
 	protected $_nestingDepth = self::MAX_NESTING_DEPTH;
 
+	/** @var array<Gwilym_Router> */
 	protected $_routers = array();
 
+	/** @var Gwilym_UriParser */
 	protected $_uriParser;
 
-	public function __construct ($uri = null)
+	/** @var array<mixed> storage for original get data */
+	protected $_get;
+
+	/** @var array<mixed> storage for original post data */
+	protected $_post;
+
+	/** @var array<mixed> storage for original cookie data */
+	protected $_cookie;
+
+	/**
+	* @param string $uri URI for this request, or leave as null to determine based on user-agent-supplied data
+	* @param array $get GET fields for this request, or leave as null to use user-agent-supplied data
+	* @param array $post POST fields for this request, or leave as null to use user-agent-supplied data
+	* @param array $cookie COOKIE fields for this request, or leave as null to use user-agent-supplied data
+	* @return Gwilym_Request
+	*/
+	public function __construct ($uri = null, $get = null, $post = null, $cookie = null)
 	{
-		if ($uri !== null)
-		{
+		if ($uri !== null) {
 			$this->uriParser(new Gwilym_UriParser_Fixed('', $uri));
 		}
+
+		$this->_get = $get === null ? $_GET : $get;
+		$this->_post = $post === null ? $_POST : $post;
+		$this->_cookie = $cookie === null ? $_COOKIE : $cookie;
 	}
 
+	/**
+	* Set or get the UriParser to use for this Request
+	*
+	* @param Gwilym_UriParser $uriParser
+	* @return Gwilym_UriParser
+	*/
 	public function uriParser (Gwilym_UriParser $uriParser = null)
 	{
-		if ($uriParser !== null)
-		{
+		if ($uriParser !== null) {
 			$this->_uriParser = $uriParser;
+			return $this;
 		}
-		else if ($this->_uriParser === null)
-		{
+
+		if ($this->_uriParser === null) {
 			$this->_uriParser = new Gwilym_UriParser_Guess;
 		}
+
 		return $this->_uriParser;
 	}
 
+	/**
+	* Returns the URI which this Request is handling
+	*
+	* @return string
+	*/
 	public function uri ()
 	{
 		return $this->uriParser()->uri();
 	}
 
+	/**
+	* Add a router to this Request
+	*
+	* @param string|Gwilym_Router $router either a string to lazy-load the router class, or an instance of Gwilym_Router
+	*/
 	public function addRouter ($router)
 	{
 		$this->_routers[] = $router;
 	}
 
+	/**
+	* Returns the HTTP request method used for this request
+	*
+	* @return string
+	*/
 	public function method ()
 	{
 		return strtoupper($_SERVER['REQUEST_METHOD']);
 	}
 
+	/**
+	* Handles this request; resolving it through routers and dispatching it to a controller
+	*
+	* @return bool true if the request was dispatched to a router, otherwise false
+	*/
 	public function handle ()
 	{
 		$transfer = null;
 
-		while (true)
-		{
-			if (!$this->_nestingDepth--)
-			{
+		while (true) {
+			if (!$this->_nestingDepth--) {
 				throw new Gwilym_Request_Exception_TooManyTransfers;
 			}
 
-			try
-			{
-				if ($transfer)
-				{
+			try {
+				if ($transfer) {
 					return $transfer->follow();
-				}
-				else
-				{
-					foreach ($this->_routers as $index => /** @var Gwilym_Router */$router)
-					{
-						if (is_string($router))
-						{
+				} else {
+					foreach ($this->_routers as $index => /** @var Gwilym_Router */$router) {
+						if (is_string($router)) {
 							$router = $this->_routers[$index] = new $router;
 						}
 
@@ -84,17 +132,12 @@ class Gwilym_Request
 					}
 					break;
 				}
-			}
-			catch (Gwilym_Request_Exception_Transfer $exception)
-			{
+			} catch (Gwilym_Request_Exception_Transfer $exception) {
 				$transfer = null;
 
-				if (class_exists($exception->to) && Gwilym_Reflection::isClassInstanciable($exception->to))
-				{
+				if (class_exists($exception->to) && Gwilym_Reflection::isClassInstanciable($exception->to)) {
 					$transfer = $this->route($exception->to, $exception->args);
-				}
-				else
-				{
+				} else {
 					$previousParser = $this->uriParser();
 					$fixedParser = new Gwilym_UriParser_Fixed($previousParser->base(), $exception->to, $previousParser->docroot());
 					$this->uriParser($fixedParser);
@@ -120,6 +163,8 @@ class Gwilym_Request
 	}
 
 	/**
+	* Given a controller class name and a set of arguments, will return an instance of Gwilym_Route which can be used for various purposes (like producing a usable URI)
+	*
 	* @param string $controller
 	* @param array $args
 	* @return Gwilym_Route
@@ -129,20 +174,52 @@ class Gwilym_Request
 		return new Gwilym_Route($this, $controller, $args);
 	}
 
+	/**
+	* Given a Route, returns a URI based on this Request's list of routers (if several routers are present, only the first usable URI will be returned)
+	*
+	* @param Gwilym_Route $route
+	*/
 	public function routeToUri (Gwilym_Route $route)
 	{
-		foreach ($this->_routers as $index => /** @var Gwilym_Router */$router)
-		{
-			if (is_string($router))
-			{
+		foreach ($this->_routers as $index => /** @var Gwilym_Router */$router) {
+			if (is_string($router)) {
 				$router = $this->_routers[$index] = new $router;
 			}
 
-			if ($uri = $router->routeToUri($route))
-			{
+			if ($uri = $router->routeToUri($route)) {
 				return $this->uriParser()->base() . $uri;
 			}
 		}
 		return false;
+	}
+
+	/**
+	* Wrapper for original $_GET data. Read only.
+	*
+	* @param string|bool $key false if specified key does not exist, otherwise returns original value as supplied by user agent (most likely a string)
+	*/
+	public function get ($key)
+	{
+		return isset($this->_get[$key]) ? $this->_get[$key] : false;
+	}
+
+	/**
+	* Wrapper for original $_POST data. Read only.
+	*
+	* @param string|bool $key false if specified key does not exist, otherwise returns original value as supplied by user agent (most likely a string)
+	*/
+	public function post ($key)
+	{
+		return isset($this->_post[$key]) ? $this->_post[$key] : false;
+	}
+
+	/**
+	* Wrapper for original $_COOKIE data. Read only.
+	*
+	* @param string|bool $key false if specified key does not exist, otherwise returns original value as supplied by user agent (most likely a string)
+	*/
+	public function cookie ($key)
+	{
+		return isset($this->_cookie[$key]) ? $this->_cookie[$key] : false;
 	}
 }
