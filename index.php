@@ -16,9 +16,3 @@ $request->addRouter('Gwilym_Router_Standard_Reverse');
 
 // go
 $request->handle();
-
-echo '<pre>';
-var_dump(1000 * (microtime(true) - GWILYM_START_TIME));
-var_dump(memory_get_usage());
-var_dump(memory_get_peak_usage());
-print_r(get_included_files());
