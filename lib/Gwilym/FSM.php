@@ -33,7 +33,7 @@ abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 		$this->_state = null;
 		$this->_states = $this->_getStates();
 
-		while ($this->_state = $this->step()) {
+		while ($this->step()) {
 			// just loop until stopped
 		}
 	}
@@ -91,6 +91,7 @@ abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 		$state = $this->_getNextState();
 
 		if (!$state) {
+			$this->stop();
 			return;
 		}
 
@@ -99,7 +100,8 @@ abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 			$this->$method();
 		}
 
-		return $state;
+		$this->_state = $state;
+		return true;
 	}
 
 	/** @return bool true if started otherwise false */
