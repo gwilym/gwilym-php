@@ -1,5 +1,4 @@
 /.htaccess
-/app/var
+/app
 /tests/coverage
 /lib/Twig
-
