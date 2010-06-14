@@ -25,7 +25,7 @@ class Gwilym_View_Twig extends Gwilym_View
 			'auto_reload' => true,
 		));
 
-		$this->_environment->addExtension(new Twig_Extension_Escaper);
+		$this->_environment->addExtension(new Twig_Extension_Escaper(true));
 	}
 
 	protected function _preRender ()
