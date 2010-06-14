@@ -7,6 +7,14 @@ class Gwilym_Response
 	const STATUS_SEE_OTHER = 303;
 	const STATUS_METHOD_NOT_ALLOWED = 405;
 
+	/** @var Gwilym_Request */
+	protected $_request;
+
+	public function __construct (Gwilym_Request $request)
+	{
+		$this->_request;
+	}
+
 	/**
 	* Send response to browser to redirect to another url.
 	*
