@@ -26,22 +26,26 @@ class Gwilym_Request
 	protected $_uriParser;
 
 	/** @var array<mixed> storage for original get data */
-	protected $_get;
+	private $_get;
 
 	/** @var array<mixed> storage for original post data */
-	protected $_post;
+	private $_post;
 
 	/** @var array<mixed> storage for original cookie data */
-	protected $_cookie;
+	private $_cookie;
+
+	/** @var array<mixed> storage for original session data, note: this is handled by reference so Gwilym_Request's $_session is just a reference to $_SESSION */
+	private $_session = null;
 
 	/**
 	* @param string $uri URI for this request, or leave as null to determine based on user-agent-supplied data
 	* @param array $get GET fields for this request, or leave as null to use user-agent-supplied data
 	* @param array $post POST fields for this request, or leave as null to use user-agent-supplied data
 	* @param array $cookie COOKIE fields for this request, or leave as null to use user-agent-supplied data
+	* @param array $session SESSION fields for this request (supplying this will prevent real session interaction), or leave as null to use a real PHP session
 	* @return Gwilym_Request
 	*/
-	public function __construct ($uri = null, $get = null, $post = null, $cookie = null)
+	public function __construct ($uri = null, $get = null, $post = null, $cookie = null, $session = null)
 	{
 		if ($uri !== null) {
 			$this->uriParser(new Gwilym_UriParser_Fixed('', $uri));
@@ -50,6 +54,7 @@ class Gwilym_Request
 		$this->_get = $get === null ? $_GET : $get;
 		$this->_post = $post === null ? $_POST : $post;
 		$this->_cookie = $cookie === null ? $_COOKIE : $cookie;
+		$this->_session = $session;
 	}
 
 	/**
@@ -196,30 +201,51 @@ class Gwilym_Request
 	/**
 	* Wrapper for original $_GET data. Read only.
 	*
-	* @param string|bool $key false if specified key does not exist, otherwise returns original value as supplied by user agent (most likely a string)
+	* @param string|null $key null if specified key does not exist, otherwise returns original value as supplied by user agent (most likely a string)
 	*/
 	public function get ($key)
 	{
-		return isset($this->_get[$key]) ? $this->_get[$key] : false;
+		return isset($this->_get[$key]) ? $this->_get[$key] : null;
 	}
 
 	/**
 	* Wrapper for original $_POST data. Read only.
 	*
-	* @param string|bool $key false if specified key does not exist, otherwise returns original value as supplied by user agent (most likely a string)
+	* @param string|null $key null if specified key does not exist, otherwise returns original value as supplied by user agent (most likely a string)
 	*/
 	public function post ($key)
 	{
-		return isset($this->_post[$key]) ? $this->_post[$key] : false;
+		return isset($this->_post[$key]) ? $this->_post[$key] : null;
 	}
 
 	/**
 	* Wrapper for original $_COOKIE data. Read only.
 	*
-	* @param string|bool $key false if specified key does not exist, otherwise returns original value as supplied by user agent (most likely a string)
+	* @param string|null $key null if specified key does not exist, otherwise returns original value as supplied by user agent (most likely a string)
 	*/
 	public function cookie ($key)
 	{
-		return isset($this->_cookie[$key]) ? $this->_cookie[$key] : false;
+		return isset($this->_cookie[$key]) ? $this->_cookie[$key] : null;
+	}
+
+	/**
+	* Get or set session data for the current request
+	*
+	* @param string $key
+	* @param mixed $value
+	* @return mixed returns previously set value or null if key does not exist
+	*/
+	public function session ($key, $value = null)
+	{
+		if ($this->_session === null) {
+			session_start();
+			$this->_session = &$_SESSION;
+		}
+
+		if (func_num_args() == 2) {
+			$this->_session[$key] = $value;
+			return $this;
+		}
+		return isset($this->_session[$key]) ? $this->_session[$key] : null;
 	}
 }
