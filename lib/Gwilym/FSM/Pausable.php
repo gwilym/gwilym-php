@@ -30,6 +30,8 @@ abstract class Gwilym_FSM_Pausable extends Gwilym_FSM
 				// just loop until stopped
 			}
 		}
+
+		$this->_exiting();
 	}
 
 	public function step ()
@@ -39,5 +41,11 @@ abstract class Gwilym_FSM_Pausable extends Gwilym_FSM
 		}
 
 		return parent::step();
+	}
+
+	public function stop ()
+	{
+		$this->_paused = false;
+		return parent::stop();
 	}
 }

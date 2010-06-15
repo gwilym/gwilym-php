@@ -35,6 +35,18 @@ abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 		while ($this->step()) {
 			// just loop until stopped
 		}
+
+		$this->_exiting();
+	}
+
+	/**
+	* This internal method is called whenever the FSM is exiting a loop of iterations (such as after a call to start(), or Pausable's resume()).
+	*
+	* It mainly exists to allow Persistable to implement auto-saving when a loop finishes, but may have other uses, too.
+	*/
+	protected function _exiting ()
+	{
+		// reserved for extendees
 	}
 
 	/** @return string returns the next state based on the current state and current conditions, or null if there is no next suitable state */
@@ -122,5 +134,7 @@ abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 
 		$this->_started = false;
 		$this->_state = null;
+
+		$this->_exiting();
 	}
 }
