@@ -14,7 +14,16 @@ abstract class Gwilym_FSM_Persistable_Session extends Gwilym_FSM_Persistable
 		parent::__construct();
 		$this->name = get_class($this);
 		$this->_request = $request;
-		$this->_id = md5($this->name . $this->_request->sessionId() . $this->_request->server('HTTP_USER_AGENT'));
+		$this->_id = null;
+	}
+
+	public function id ()
+	{
+		// lazy-generate the id so consumer code is given a chance to set a custom machine name before an id is created
+		if ($this->_id === null) {
+			$this->_id = md5($this->name . $this->_request->sessionId() . $this->_request->session('Gwilym_Session_Started') . $this->_request->session('Gwilym_Session_Random'));
+		}
+		return $this->_id;
 	}
 
 	/**
@@ -41,7 +50,7 @@ abstract class Gwilym_FSM_Persistable_Session extends Gwilym_FSM_Persistable
 	public function load ($id = null)
 	{
 		if ($id === null) {
-			$id = $this->_id;
+			$id = $this->id();
 		}
 
 		$form = $this->_request->session('gwilym,fsm,' . $this->name . ',' . $id);
