@@ -53,6 +53,15 @@ class Gwilym_Request
 		if ($this->_session === null) {
 			session_start();
 			$this->_session = &$_SESSION;
+
+			if (!isset($this->_session['Gwilym_Session_Started'])) {
+				$this->_session['Gwilym_Session_Started'] = time();
+			}
+
+			if (!isset($this->_session['Gwilym_Session_Random'])) {
+				$this->_session['Gwilym_Session_Random'] = uniqid('', true);
+			}
+
 			return true;
 		}
 		return false;
