@@ -2,6 +2,9 @@
 
 class Gwilym_Autoloader
 {
+	const PRIORITY_LOW = 0;
+	const PRIORITY_HIGH = 1;
+
 	protected static $_paths = array();
 
 	/**
@@ -46,9 +49,13 @@ class Gwilym_Autoloader
 		}
 	}
 
-	public static function addPath ($path)
+	public static function addPath ($path, $priority = self::PRIORITY_LOW)
 	{
-		self::$_paths[] = $path;
+		if ($priority == self::PRIORITY_LOW) {
+			self::$_paths[] = $path;
+		} else {
+			array_unshift(self::$_paths, $path);
+		}
 	}
 
 	public static function register ()
