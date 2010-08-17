@@ -1,14 +1,26 @@
 <?php
 
 /**
-* Implements the base of a finite state machine / state executor in PHP. Extend on this base class to implement specific functionality.
+* Implements the base of a finite state machine / state executor in PHP. Extend on this base class to implement specific functionality. Storage of payload data can be implemented inside child classes.
 */
 abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 {
 	/** @var bool whether the fsm is started (running) or not */
 	protected $_started = false;
 
-	/** @var array set of state -> transition data */
+	/**
+	* $this->_states = array(
+	*     'start' => 'firstStep',
+	*     'firstStep' => array(
+	*         array('on' => 'someCondition', 'goto' => 'secondBranch'),
+	*         'firstBranch',
+	*     'firstBranch' => 'firstStep',
+	*     'secondBranch' => 'end',
+	*     'end' => null,
+	* );
+	*
+	* @var array set of state -> transition data
+	*/
 	protected $_states;
 
 	/** @var string name of current state */
