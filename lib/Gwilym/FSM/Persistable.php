@@ -14,12 +14,6 @@ abstract class Gwilym_FSM_Persistable extends Gwilym_FSM_Pausable
 	/** @var array set of data which will be persisted when save() is called */
 	public $data = array();
 
-	public function __construct ()
-	{
-		parent::__construct();
-		$this->_id = md5(uniqid('', true));
-	}
-
 	protected function _exiting ()
 	{
 		if ($this->autosave()) {
@@ -48,6 +42,9 @@ abstract class Gwilym_FSM_Persistable extends Gwilym_FSM_Pausable
 	/** @return string random / unique id assigned to this fsm instance */
 	public function id ()
 	{
+		if ($this->_id === null) {
+			$this->_id = md5(uniqid('', true));
+		}
 		return $this->_id;
 	}
 
