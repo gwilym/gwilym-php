@@ -44,8 +44,7 @@ class Gwilym_Route
 			}
 		}
 
-		if ($controller->before() !== false)
-		{
+		if ($controller->before() !== false) {
 			$controller->action();
 			$controller->after();
 		}
