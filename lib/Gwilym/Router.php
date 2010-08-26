@@ -2,6 +2,9 @@
 
 abstract class Gwilym_Router
 {
+	/** @var Gwilym_Route The route which is currently being followed from request to controller */
+	protected $_currentRoute;
+	
 	/**
 	* @param string $controller
 	* @param string $action
@@ -24,10 +27,15 @@ abstract class Gwilym_Router
 	public function route (Gwilym_Request $request)
 	{
 		$route = $this->requestToRoute($request);
-		if (!$route)
-		{
+		if (!$route) {
 			return false;
 		}
+		$this->_currentRoute = $route;
 		return $route->follow();
+	}
+	
+	public function getCurrentRoute ()
+	{
+		return $this->_currentRoute;
 	}
 }

@@ -27,6 +27,9 @@ class Gwilym_Request
 
 	/** @var Gwilym_Response */
 	protected $_response;
+	
+	/** @var Gwilym_Router The router which is currently directing the request to the controller */
+	protected $_currentRouter;
 
 	/** @var array<mixed> storage for original $_GET data */
 	private $_get;
@@ -128,6 +131,16 @@ class Gwilym_Request
 	{
 		$this->_routers[] = $router;
 	}
+	
+	public function getCurrentRouter ()
+	{
+		return $this->_currentRouter;
+	}
+	
+	public function getCurrentRoute ()
+	{
+		return $this->getCurrentRouter()->getCurrentRoute();
+	}
 
 	/**
 	* Returns the HTTP request method used for this request
@@ -161,7 +174,7 @@ class Gwilym_Request
 						if (is_string($router)) {
 							$router = $this->_routers[$index] = new $router;
 						}
-
+						$this->_currentRouter = $router;
 						$result = $router->route($this);
 						if ($result !== false) {
 							return true;
@@ -176,7 +189,11 @@ class Gwilym_Request
 					$transfer = $this->route($exception->to, $exception->args);
 				} else {
 					$previousParser = $this->uriParser();
-					$fixedParser = new Gwilym_UriParser_Fixed($previousParser->base(), $exception->to, $previousParser->docroot());
+					$fixedParser = new Gwilym_UriParser_Fixed(
+						$previousParser->base(),
+						$exception->to,
+						$previousParser->docroot()
+					);
 					$this->uriParser($fixedParser);
 				}
 			}
