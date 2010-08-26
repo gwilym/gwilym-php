@@ -36,6 +36,16 @@ abstract class Gwilym_Controller implements Gwilym_Controller_Interface
 		return $this->_request;
 	}
 
+	/**
+	* The response object this controller should manipulate (currently just a shortcut method to request()->response())
+	*
+	* @return Gwilym_Response
+	*/
+	public function response ()
+	{
+		return $this->_request->response();
+	}
+
 	public function getDefaultViewPath ($ext = 'php')
 	{
 		return str_replace('_', '/', str_replace('^Controller_', '', '^' . get_class($this))) . '.' . $ext;
