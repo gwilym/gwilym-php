@@ -14,12 +14,46 @@ abstract class Gwilym_FSM_Persistable extends Gwilym_FSM_Pausable
 	/** @var array set of data which will be persisted when save() is called */
 	public $data = array();
 
+	/** @var Gwilym_FSM_Persister_Interface */
+	protected $_persister;
+
 	protected function _exiting ()
 	{
 		if ($this->autosave()) {
 			$this->save();
 		}
 		return parent::_exiting();
+	}
+	
+	public function getPersistData ()
+	{
+		// @todo dont like this fn name
+		return array(
+			'id' => $this->_id,
+			'started' => $this->_started,
+			'state' => $this->_state,
+			'data' => $this->data,
+		);
+	}
+	
+	public function unpersist ($data)
+	{
+		// @todo dont like this fn name
+		$this->_id = $data['id'];
+		$this->_started = $data['started'];
+		$this->_state = $data['state'];
+		$this->data = $data['data'];
+		$this->pause();
+	}
+	
+	public function setPersister (Gwilym_FSM_Persister_Interface $value) {
+		$this->_persister = $value;
+		return $this;
+	}
+	
+	public function getPersister ()
+	{
+		return $this->_persister;
 	}
 
 	/**
@@ -53,7 +87,10 @@ abstract class Gwilym_FSM_Persistable extends Gwilym_FSM_Pausable
 	*
 	* @return void
 	*/
-	abstract public function save ();
+	public function save ()
+	{
+		return $this->getPersister()->save($this);
+	}
 
 	/**
 	* Load the state and data information of an existing FSM into this instance
@@ -61,5 +98,21 @@ abstract class Gwilym_FSM_Persistable extends Gwilym_FSM_Pausable
 	* @param string $id
 	* @return void
 	*/
-	abstract public function load ($id);
+	public function load ($id = null)
+	{
+		if ($id === null) {
+			$id = $this->id();
+		}
+		return $this->getPersister()->load($this, $id);
+	}
+	
+	/**
+	* Deletes all state and data information for the current FSM.
+	*
+	* @return void
+	*/
+	public function delete ()
+	{
+		return $this->getPersister->delete($this);
+	}
 }
