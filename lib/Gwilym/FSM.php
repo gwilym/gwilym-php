@@ -48,7 +48,7 @@ abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 			// just loop until stopped
 		}
 
-		$this->_exiting();
+		$this->_stopping();
 	}
 
 	/**
@@ -56,7 +56,7 @@ abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 	*
 	* It mainly exists to allow Persistable to implement auto-saving when a loop finishes, but may have other uses, too.
 	*/
-	protected function _exiting ()
+	protected function _stopping ()
 	{
 		// reserved for extendees
 	}
@@ -147,6 +147,6 @@ abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 		$this->_started = false;
 		$this->_state = null;
 
-		$this->_exiting();
+		$this->_stopping();
 	}
 }
