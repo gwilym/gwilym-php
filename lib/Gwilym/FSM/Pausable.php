@@ -31,7 +31,7 @@ abstract class Gwilym_FSM_Pausable extends Gwilym_FSM
 			}
 		}
 
-		$this->_exiting();
+		$this->_stopping();
 	}
 
 	public function step ()
