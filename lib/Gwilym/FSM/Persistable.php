@@ -17,12 +17,12 @@ abstract class Gwilym_FSM_Persistable extends Gwilym_FSM_Pausable
 	/** @var Gwilym_FSM_Persister_Interface */
 	protected $_persister;
 
-	protected function _exiting ()
+	protected function _stopping ()
 	{
 		if ($this->autosave()) {
 			$this->save();
 		}
-		return parent::_exiting();
+		return parent::_stopping();
 	}
 	
 	public function getPersistData ()
@@ -69,7 +69,7 @@ abstract class Gwilym_FSM_Persistable extends Gwilym_FSM_Pausable
 		if ($autosave === null) {
 			return $this->_autosave;
 		}
-		$this->_autosave = $autosave;
+		$this->_autosave = (bool)$autosave;
 		return $this;
 	}
 
@@ -113,6 +113,6 @@ abstract class Gwilym_FSM_Persistable extends Gwilym_FSM_Pausable
 	*/
 	public function delete ()
 	{
-		return $this->getPersister->delete($this);
+		return $this->getPersister()->delete($this);
 	}
 }
