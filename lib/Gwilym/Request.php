@@ -225,6 +225,9 @@ class Gwilym_Request
 	*/
 	public function route ($controller, $args = array())
 	{
+		if (!is_array($args)) {
+			$args = array($args);
+		}
 		return new Gwilym_Route($this, $controller, $args);
 	}
 
