@@ -27,7 +27,12 @@ class Gwilym_FSM_Persister_Session implements Gwilym_FSM_Persister_Interface
 	
 	public function load (Gwilym_FSM $fsm, $id)
 	{
-		$fsm->unpersist(unserialize($this->_request->session($this->_getKey($fsm, $id))));
+		$serialized = $this->_request->session($this->_getKey($fsm, $id));
+		if (!$serialized) {
+			throw new Gwilym_FSM_Persister_Exception_FsmNotFound;
+		}
+		
+		$fsm->unpersist(unserialize($serialized));
 	}
 	
 	public function delete (Gwilym_FSM $fsm)
@@ -41,6 +46,6 @@ class Gwilym_FSM_Persister_Session implements Gwilym_FSM_Persister_Interface
 		if ($id === null) {
 			$id = $fsm->id();
 		}
-		return 'gwilym,fsm,' . get_class($fsm) . ',' . md5($id);
+		return 'gwilym,fsm,' . get_class($fsm) . ',' . $id;
 	}
 }
