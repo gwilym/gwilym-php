@@ -28,11 +28,9 @@ abstract class Gwilym_Form extends Gwilym_FSM_Persistable
 		$this->_token = $token ? $token : md5(uniqid('', true));
 		$this->setRequest($request);
 		
-		if ($id !== null) {
+		if ($id !== null && $token !== null) {
 			$this->load($id, $token);
 		}
-		
-		$this->resume();
 	}
 	
 	public function getPersistData ()
