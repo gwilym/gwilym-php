@@ -7,22 +7,45 @@
 */
 abstract class Gwilym_Form extends Gwilym_FSM_Persistable
 {
+	/** @var Gwilym_Request a reference to the current request object to be passed in on construct */
 	protected $_request;
 	
-	protected $_id;
-
+	/** @var array<Gwilym_Form_Field> a set of form field instances for validation purposes */
 	protected $_fields = array();
 	
+	/** @var string the POST field to look for which will contain this form's id */
+	protected $_idInput = '_form_id';
+	
+	/** @var string the POST field to look for which will contain this form's security token */
 	protected $_tokenInput = '_form_token';
 	
-	public function __construct (Gwilym_Request $request)
+	protected $_token;
+	
+	public function __construct (Gwilym_Request $request, $id = null, $token = null)
 	{
-		parent::__construct();
+		parent::__construct($id);
+		
+		$this->_token = $token ? $token : md5(uniqid('', true));
 		$this->setRequest($request);
-		$token = $this->_request->post($this->_tokenInput);
-		if ($token) {
-			$this->load($token);
+		
+		if ($id !== null) {
+			$this->load($id, $token);
 		}
+		
+		$this->resume();
+	}
+	
+	public function getPersistData ()
+	{
+		$return = parent::getPersistData();
+		$return['token'] = $this->_token;
+		return $return;
+	}
+	
+	public function unpersist ($data)
+	{
+		$this->_token = $data['token'];
+		parent::unpersist($data);
 	}
 	
 	public function setRequest (Gwilym_Request $request)
@@ -40,21 +63,12 @@ abstract class Gwilym_Form extends Gwilym_FSM_Persistable
 	{
 		return $this->_request->response();
 	}
-
-	public function setId ($value)
-	{
-		$this->_id = (string)$value;
-		return $this;
-	}
-
-	public function getId ()
-	{
-		if ($this->_id === null) {
-			$this->_id = md5(uniqid('', true));
-		}
-		return $this->_id;
-	}
 	
+	public function getIdInput ()
+	{
+		return $this->_idInput;
+	}
+
 	public function getTokenInput ()
 	{
 		return $this->_tokenInput;
@@ -67,7 +81,7 @@ abstract class Gwilym_Form extends Gwilym_FSM_Persistable
 	
 	public function getToken ()
 	{
-		return $this->getId();
+		return $this->_token;
 	}
 
 	public function addField (Gwilym_Form_Field $field, $group = '')
@@ -91,6 +105,19 @@ abstract class Gwilym_Form extends Gwilym_FSM_Persistable
 		}
 
 		return false;
+	}
+	
+	public function load ($id, $token = null)
+	{
+		try {
+			parent::load($id);
+		} catch (Gwilym_FSM_Persister_Exception_FsmNotFound $exception) {
+			throw new Gwilym_Form_Exception_FormNotFound;
+		}
+		if ($token !== null && strcmp($this->getToken(), (string)$token) !== 0) {
+			throw new Gwilym_Form_Exception_InvalidToken;
+		}
+		return true;
 	}
 	
 	/**
@@ -133,7 +160,7 @@ abstract class Gwilym_Form extends Gwilym_FSM_Persistable
 	
 	protected function _initState ()
 	{
-		$this->data['message'] = 'initial state message';
+		$this->data['form']['message'] = 'initial state message';
 	}
 	
 	protected function _displayState ()
