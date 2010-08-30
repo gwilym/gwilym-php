@@ -16,6 +16,12 @@ abstract class Gwilym_FSM_Persistable extends Gwilym_FSM_Pausable
 
 	/** @var Gwilym_FSM_Persister_Interface */
 	protected $_persister;
+	
+	public function __construct ($id = null)
+	{
+		$this->_id = $id;
+		parent::__construct();
+	}
 
 	protected function _stopping ()
 	{
@@ -74,12 +80,16 @@ abstract class Gwilym_FSM_Persistable extends Gwilym_FSM_Pausable
 	}
 
 	/** @return string random / unique id assigned to this fsm instance */
-	public function id ()
+	public function id ($id = null)
 	{
-		if ($this->_id === null) {
-			$this->_id = md5(uniqid('', true));
+		if ($id === null) {
+			if ($this->_id === null) {
+				$this->_id = md5(uniqid('', true));
+			}
+			return $this->_id;
 		}
-		return $this->_id;
+		$this->_id = $id;
+		return $this;
 	}
 
 	/**
@@ -98,11 +108,8 @@ abstract class Gwilym_FSM_Persistable extends Gwilym_FSM_Pausable
 	* @param string $id
 	* @return void
 	*/
-	public function load ($id = null)
+	public function load ($id)
 	{
-		if ($id === null) {
-			$id = $this->id();
-		}
 		return $this->getPersister()->load($this, $id);
 	}
 	
