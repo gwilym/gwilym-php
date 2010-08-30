@@ -118,6 +118,8 @@ abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 			return;
 		}
 
+		Gwilym_Debug::printLine("FSM " . get_class($this) . " entering state: " . $state);
+
 		$method = '_' . $state;
 		if (method_exists($this, $method)) {
 			$this->$method();
