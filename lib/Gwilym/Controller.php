@@ -3,23 +3,36 @@
 abstract class Gwilym_Controller implements Gwilym_Controller_Interface
 {
 	/**
-	* Local access to view class for this controller.
-	*
-	* @var Gwilym_View
-	*/
-	protected $_view;
+	 * Storage for View implementation for this controller.
+	 *
+	 * Private. Child classes should use view() to access.
+	 *
+	 * @var Gwilym_View
+	 */
+	private $_view;
 
 	/**
-	* @var Gwilym_Request
-	*/
+	 * The request object which is invoking this controller.
+	 *
+	 * @var Gwilym_Request
+	 */
 	protected $_request;
 
+	/**
+	 * Array of arguments which have been passed from the Request to this controller. Exact contents and structure
+	 * will vary depending on the URI, Route and perhaps the Controller itself.
+	 *
+	 * Validate your usage of this - it should be treated as unsafe.
+	 *
+	 * @var array
+	 */
 	protected $_args;
 
 	/**
-	* @param Gwilym_Request $request
-	* @return Gwilym_Controller
-	*/
+	 * @param Gwilym_Request $request
+	 * @param array $args
+	 * @return Gwilym_Controller
+	 */
 	public function __construct (Gwilym_Request $request, $args = array())
 	{
 		$this->_request = $request;
@@ -37,7 +50,7 @@ abstract class Gwilym_Controller implements Gwilym_Controller_Interface
 	}
 
 	/**
-	* The response object this controller should manipulate (currently just a shortcut method to request()->response())
+	* The Response object for this Controller. Typically the same as $this->request()->response()
 	*
 	* @return Gwilym_Response
 	*/
@@ -46,16 +59,24 @@ abstract class Gwilym_Controller implements Gwilym_Controller_Interface
 		return $this->_request->response();
 	}
 
+	/**
+	 * Generates a path to a default View file based on the name of this controller.
+	 *
+	 * @todo come up with a better way of implementing Views in general, and default Views specifically
+	 * @return string
+	 */
 	public function getDefaultViewPath ($ext = 'php')
 	{
 		return str_replace('_', '/', str_replace('^Controller_', '', '^' . get_class($this))) . '.' . $ext;
 	}
 
 	/**
-	* By default, set a plain PHP view type which maps from Controller_Foo_Bar to /app/View/Foo/Bar.php. Individual or abstract controllers extending Gwilym_Controller can override this method to either set a new pattern or a single, specific template.
-	*
-	* @return Gwilym_View
-	*/
+	 * The View object for this controller. By default this will be a View_Php type which is named after the
+	 * current controller (such as /app/View/Foo/Bar.php). Child classes can override this to provide either a new
+	 * algorithm for automatically creating a view, or provide a specific view.
+	 *
+	 * @return Gwilym_View
+	 */
 	public function view (Gwilym_View $view = null)
 	{
 		if (func_num_args())
@@ -72,20 +93,21 @@ abstract class Gwilym_Controller implements Gwilym_Controller_Interface
 	}
 
 	/**
-	* Called before all controller actions. Override and return false to prevent action. If prevented, view will still display, so set appropriate view or set to Gwilym_View_None.
-	*
-	* @return bool
-	*/
+	 * Called before all controller actions. Override and return false to prevent action. If prevented but not
+	 * redirected, view will still display, so set appropriate view or set to Gwilym_View_None.
+	 *
+	 * @return bool
+	 */
 	public function before ()
 	{
 		return true;
 	}
 
 	/**
-	* Called after all controller actions. Last chance to manipulate controller / view before view display.
-	*
-	* @return void
-	*/
+	 * Called after all controller actions. Last chance to manipulate controller / view before view display.
+	 *
+	 * @return void
+	 */
 	public function after ()
 	{
 	}
