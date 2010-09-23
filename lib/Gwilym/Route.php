@@ -20,27 +20,33 @@ class Gwilym_Route
 	}
 
 	/**
-	* @return void
-	*/
+	 * @todo consider making this return a View object from the Controller which is then displayed by the Router?
+	 * @return void
+	 */
 	public function follow ()
 	{
 		/** @var Gwilym_Controller */
 		$controller = new $this->_controller($this->_request, $this->_args);
 
+		// check to see if this controller can only be accessed by certain request methods
+		// @todo will need to alter this if controllers are ever accessed via non-HTTP
 		if ($controller instanceof Gwilym_Controller_MethodSpecific) {
 			$method = $this->_request->method();
-			$response = $controller->response();
-
+			
 			if ($controller instanceof Gwilym_Controller_PostOnly && $method !== 'POST') {
-				$response->status(Gwilym_Response::STATUS_METHOD_NOT_ALLOWED);
-				$response->header('Allow', 'POST');
-				$response->end();
+				$this->_request
+					->response()
+					->status(Gwilym_Response::STATUS_METHOD_NOT_ALLOWED)
+					->header('Allow', 'POST')
+					->end();
 			}
 
 			if ($controller instanceof Gwilym_Controller_GetOnly && $method !== 'GET') {
-				$response->status(Gwilym_Response::STATUS_METHOD_NOT_ALLOWED);
-				$response->header('Allow', 'GET');
-				$response->end();
+				$this->_request
+					->response()
+					->status(Gwilym_Response::STATUS_METHOD_NOT_ALLOWED)
+					->header('Allow', 'GET')
+					->end();
 			}
 		}
 
@@ -49,7 +55,8 @@ class Gwilym_Route
 			$controller->after();
 		}
 
-		$controller->view()->display();
+		$controller->view()
+			->display();
 	}
 
 	public function request ()
@@ -74,6 +81,7 @@ class Gwilym_Route
 	*/
 	public function uri ()
 	{
-		return $this->request()->routeToUri($this);
+		return $this->request()
+			->routeToUri($this);
 	}
 }
