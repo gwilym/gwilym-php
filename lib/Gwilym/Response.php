@@ -27,16 +27,30 @@ class Gwilym_Response
 		$this->end();
 	}
 
+	/**
+	 * @return Gwilym_Response
+	 */
 	public function status ($status)
 	{
 		header('HTTP/1.1 ' . $status, true, $status);
+		return $this;
 	}
 
+	/**
+	 * @return Gwilym_Response
+	 */
 	public function header ($header, $value, $replace = true)
 	{
 		header($header . ': ' . $value, $replace);
+		return $this;
 	}
 
+	/**
+	 * Terminates the current response and ends the PHP script
+	 *
+	 * @todo look into ending the response but not the script, or throw an exception to be caught by the router
+	 *       so it can clean up properly instead of just calling exit()
+	 */
 	public function end ()
 	{
 		exit;
