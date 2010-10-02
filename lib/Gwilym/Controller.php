@@ -94,7 +94,7 @@ abstract class Gwilym_Controller implements Gwilym_Controller_Interface
 
 		if ($this->_view === null)
 		{
-			$this->_view = new Gwilym_View_Php($this->getDefaultViewPath());
+			$this->_view = new Gwilym_View_Php($this, $this->getDefaultViewPath());
 		}
 
 		return $this->_view;
