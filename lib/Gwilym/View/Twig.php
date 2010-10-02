@@ -8,8 +8,20 @@ class Gwilym_View_Twig extends Gwilym_View
 	protected $_environment;
 	protected $_template;
 
-	public function __construct ($file, $paths = array())
+	protected function _preRender ()
 	{
+		$this->_template = $this->_environment->loadTemplate($this->_file);
+	}
+	
+	protected function _getContext ()
+	{
+		return $this->data();
+	}
+
+	public function __construct (Gwilym_Controller $controller, $file, $paths = array())
+	{
+		parent::__construct($controller);
+		
 		if (empty($paths)) {
 			$paths[] = GWILYM_APP_DIR . '/View/';
 		}
@@ -28,20 +40,15 @@ class Gwilym_View_Twig extends Gwilym_View
 		$this->_environment->addExtension(new Twig_Extension_Escaper(true));
 	}
 
-	protected function _preRender ()
-	{
-		$this->_template = $this->_environment->loadTemplate($this->_file);
-	}
-
 	public function display ()
 	{
 		$this->_preRender();
-		$this->_template->display($this->data);
+		$this->_template->display($this->_getContext());
 	}
 
 	public function render ()
 	{
 		$this->_preRender();
-		$this->_template->render($this->data);
+		return $this->_template->render($this->_getContext());
 	}
 }
