@@ -27,7 +27,15 @@ abstract class Gwilym_Controller implements Gwilym_Controller_Interface
 	 * @var array
 	 */
 	protected $_args;
-
+	
+	/**
+	 * Data dictionary for use by view when rendering. Should contain any models or ad-hoc information for the view
+	 * to render correctly.
+	 *
+	 * @var array
+	 */
+	protected $_data = array();
+	
 	/**
 	 * @param Gwilym_Request $request
 	 * @param array $args
@@ -110,5 +118,10 @@ abstract class Gwilym_Controller implements Gwilym_Controller_Interface
 	 */
 	public function after ()
 	{
+	}
+	
+	public function data ()
+	{
+		return $this->_data;
 	}
 }
