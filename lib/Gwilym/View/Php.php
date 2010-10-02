@@ -4,8 +4,9 @@ class Gwilym_View_Php extends Gwilym_View
 {
 	protected $_template;
 
-	public function __construct ($template)
+	public function __construct (Gwilym_Controller $controller, $template)
 	{
+		parent::__construct($controller);
 		$this->_template = $template;
 	}
 
