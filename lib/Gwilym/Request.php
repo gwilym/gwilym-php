@@ -45,7 +45,7 @@ class Gwilym_Request
 
 	/** @var array<mixed> storage for original $_SERVER data */
 	private $_server;
-
+	
 	/**
 	* Calling this ensures the session has been started
 	*
@@ -132,12 +132,12 @@ class Gwilym_Request
 		$this->_routers[] = $router;
 	}
 	
-	public function getCurrentRouter ()
+	public function currentRouter ()
 	{
 		return $this->_currentRouter;
 	}
 	
-	public function getCurrentRoute ()
+	public function currentRoute ()
 	{
 		return $this->getCurrentRouter()->getCurrentRoute();
 	}
@@ -161,11 +161,13 @@ class Gwilym_Request
 	{
 		$transfer = null;
 
+		// begin a mainline loop which continues until the request is resolved or ended
 		while (true) {
 			if (!$this->_nestingDepth--) {
 				throw new Gwilym_Request_Exception_TooManyTransfers;
 			}
 
+			// a request can be jumped-out of using exceptions; begin listening for that here
 			try {
 				if ($transfer) {
 					return $transfer->follow();
@@ -177,6 +179,7 @@ class Gwilym_Request
 						$this->_currentRouter = $router;
 						$result = $router->route($this);
 						if ($result !== false) {
+							// routing was successful
 							return true;
 						}
 					}
@@ -186,12 +189,14 @@ class Gwilym_Request
 				$transfer = null;
 
 				if (class_exists($exception->to) && Gwilym_Reflection::isClassInstanciable($exception->to)) {
-					$transfer = $this->route($exception->to, $exception->args);
+					// explicit transfer to named class
+					$transfer = $this->route($exception->to(), $exception->args());
 				} else {
+					// the specified transfer should be routed like a uri
 					$previousParser = $this->uriParser();
 					$fixedParser = new Gwilym_UriParser_Fixed(
 						$previousParser->base(),
-						$exception->to,
+						$exception->to(),
 						$previousParser->docroot()
 					);
 					$this->uriParser($fixedParser);
@@ -199,6 +204,7 @@ class Gwilym_Request
 			}
 		}
 
+		// if this point was reached then the request wasn't able to be handled properly
 		return false;
 	}
 
@@ -211,8 +217,8 @@ class Gwilym_Request
 	public function transfer ($to, $args = array())
 	{
 		$exception = new Gwilym_Request_Exception_Transfer;
-		$exception->to = $to;
-		$exception->args = $args;
+		$exception->to($to);
+		$exception->args($args);
 		throw $exception;
 	}
 
@@ -271,13 +277,30 @@ class Gwilym_Request
 	}
 
 	/**
-	* Wrapper for original $_COOKIE data. Read only. (todo: should be read/write)
+	* Wrapper for original $_COOKIE data.
 	*
-	* @param string|null $key null if specified key does not exist, otherwise returns original value as supplied by user agent (most likely a string)
+	* @param string $name cookie to reference
+	* @param string $value optionally set cookie $name to specified value, or null to delete -- path, domain, etc. parameters must match those set on original cookie to delete it
+	* @return string value supplied by user-agent or false if specified key does not exist
 	*/
-	public function cookie ($key)
+	public function cookie ($key, $value = null, $expire = 0, $path = null, $domain = null, $secure = false, $httponly = false)
 	{
-		return isset($this->_cookie[$key]) ? $this->_cookie[$key] : null;
+		if (func_num_args() < 2) {
+			// get
+			return isset($this->_cookie[$key]) ? $this->_cookie[$key] : null;
+		}
+		
+		if ($value === null) {
+			// delete
+			unset($this->_cookie[$key]);
+			__gwilym_request_setcookie($key, '', time() - 3600, $path, $domain, $secure, $httponly);
+			return $this;
+		}
+		
+		// set
+		$this->_cookie[$key] = $value;
+		__gwilym_request_setcookie($key, $value, $expire, $path, $domain, $secure, $httponly);
+		return $this;
 	}
 
 	/**
@@ -320,5 +343,20 @@ class Gwilym_Request
 	public function server ($key)
 	{
 		return isset($this->_server[$key]) ? $this->_server[$key] : null;
+	}
+}
+
+// version-specific wrappers for this class
+
+if (version_compare(PHP_VERSION, '5.2.0') >= 0) {
+	// setcookie $httponly added in 5.2
+	function __gwilym_request_setcookie ($key, $value, $expire, $path, $domain, $secure, $httponly)
+	{
+		return setcookie($key, $value, $expire, $path, $domain, $secure, $httponly);
+	}
+} else {
+	function __gwilym_request_setcookie ($key, $value, $expire, $path, $domain, $secure, $httponly)
+	{
+		return setcookie($key, $value, $expire, $path, $domain, $secure);
 	}
 }
