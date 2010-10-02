@@ -26,7 +26,7 @@ class Gwilym_Router_Fixed extends Gwilym_Router
 	*/
 	public function requestToRoute (Gwilym_Request $request)
 	{
-		$requestUri = $request->uri();
+		$requestUri = $request->getUri();
 		foreach ($this->_routes as $routeUri => $controller)
 		{
 			if ($requestUri === $routeUri)

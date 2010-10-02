@@ -22,17 +22,17 @@ class Gwilym_UriParser_Fixed extends Gwilym_UriParser
 		$this->_docroot = $docroot;
 	}
 
-	public function base ()
+	public function getBase ()
 	{
 		return $this->_base;
 	}
 
-	public function docroot ()
+	public function getDocRoot ()
 	{
 		return $this->_docroot;
 	}
 
-	public function uri ()
+	public function getUri ()
 	{
 		return $this->_uri;
 	}

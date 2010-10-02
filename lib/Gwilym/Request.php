@@ -98,7 +98,7 @@ class Gwilym_Request
 	* @param Gwilym_UriParser $uriParser
 	* @return Gwilym_UriParser
 	*/
-	public function uriParser (Gwilym_UriParser $uriParser = null)
+	public function getUriParser (Gwilym_UriParser $uriParser = null)
 	{
 		if ($uriParser !== null) {
 			$this->_uriParser = $uriParser;
@@ -117,9 +117,9 @@ class Gwilym_Request
 	*
 	* @return string
 	*/
-	public function uri ()
+	public function getUri ()
 	{
-		return $this->uriParser()->uri();
+		return $this->getUriParser()->getUri();
 	}
 
 	/**
