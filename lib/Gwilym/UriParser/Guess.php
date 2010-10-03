@@ -8,11 +8,13 @@
 class Gwilym_UriParser_Guess extends Gwilym_UriParser
 {
 	protected $_parsed = false;
+	
+	protected $_requestUri;
+	protected $_requestBaseDir;
+
 	protected $_base;
 	protected $_docRoot;
 	protected $_uri;
-	protected $_requestUri;
-	protected $_requestBaseDir;
 	
 	protected function _parse ()
 	{
@@ -34,9 +36,9 @@ class Gwilym_UriParser_Guess extends Gwilym_UriParser
 			if ($basepart == $subdir) {
 				// match - found an alignment of the directories that the bootstrap file is in, compared to the uri requested
 				$this->_base = '/' . implode('/', $subdir);
-				$this->_docroot = implode(DIRECTORY_SEPARATOR, array_slice($base, 0, count($base) - $i));
+				$this->_docRoot = implode(DIRECTORY_SEPARATOR, array_slice($base, 0, count($base) - $i));
 				if (!Gwilym_PHP::isWindows()) {
-					$this->_docroot  = DIRECTORY_SEPARATOR . $this->_docroot;
+					$this->_docRoot  = DIRECTORY_SEPARATOR . $this->_docRoot;
 				}
 				$this->_uri = '/' . implode('/', array_slice($uri, $i));
 				$this->_parsed = true;
@@ -45,12 +47,12 @@ class Gwilym_UriParser_Guess extends Gwilym_UriParser
 		}
 
 		// if no alignment is made, assume that bootstrap is located at the doc root, meaning there is no sub-dir and the REQUEST_URI is the actual uri we want
-		$this->_docroot = $this->requestBaseDir();
+		$this->_docRoot = $this->getRequestBaseDir();
 		$this->_base = '';
-		$this->_uri = $this->requestUri();
+		$this->_uri = $this->getRequestUri();
 	}
 
-	public function getRequestUri ($requestUri = null)
+	public function getRequestUri ()
 	{
 		if ($this->_requestUri === null) {
 			$this->_requestUri = $_SERVER['REQUEST_URI'];
@@ -59,14 +61,14 @@ class Gwilym_UriParser_Guess extends Gwilym_UriParser
 		return $this->_requestUri;
 	}
 
-	public function setRequestUri ($requestUri = null)
+	public function setRequestUri ($requestUri)
 	{
 		$this->_requestUri = $requestUri;
 		$this->_parsed = false;
 		return $this;
 	}
 
-	public function getRequestBaseDir ($requestBaseDir = null)
+	public function getRequestBaseDir ()
 	{
 		if ($this->_requestBaseDir === null) {
 			$this->_requestBaseDir = GWILYM_BASE_DIR;
@@ -75,7 +77,7 @@ class Gwilym_UriParser_Guess extends Gwilym_UriParser
 		return $this->_requestBaseDir;
 	}
 
-	public function setRequestBaseDir ($requestBaseDir = null)
+	public function setRequestBaseDir ($requestBaseDir)
 	{
 		$this->_requestBaseDir = $requestBaseDir;
 		$this->_parsed = false;
