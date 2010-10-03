@@ -10,6 +10,9 @@ class Gwilym_Request
 	/** @var int max allowed nesting (transfer) depth before Gwilym_Request_Exception_TooManyTransfers is thrown */
 	const MAX_NESTING_DEPTH = 20;
 
+	/** @var array<mixed> storage for original session data, note: this is handled by reference so Gwilym_Request's $_session is just a reference to $_SESSION */
+	private $_session = null;
+
 	/**
 	* Calls to handle() may eventually make another call to handle() if transfer() is called. This value controls the maximum amount of times handle() can be called for one instance.
 	*
@@ -31,20 +34,20 @@ class Gwilym_Request
 	/** @var Gwilym_Router The router which is currently directing the request to the controller */
 	protected $_currentRouter;
 
+	/** @var string storage for original server request method (GET, POST, etc.) */
+	protected $_method;
+	
 	/** @var array<mixed> storage for original $_GET data */
-	private $_get;
+	public $get;
 
 	/** @var array<mixed> storage for original $_POST data */
-	private $_post;
+	public $post;
 
 	/** @var array<mixed> storage for original $_COOKIE data */
-	private $_cookie;
-
-	/** @var array<mixed> storage for original session data, note: this is handled by reference so Gwilym_Request's $_session is just a reference to $_SESSION */
-	private $_session = null;
+	public $cookie;
 
 	/** @var array<mixed> storage for original $_SERVER data */
-	private $_server;
+	public $server;
 	
 	/**
 	* Calling this ensures the session has been started
@@ -79,17 +82,25 @@ class Gwilym_Request
 	* @param array $server SERVER fields for this request, or leave as null to use user-agent- & server-api-supplied data
 	* @return Gwilym_Request
 	*/
-	public function __construct ($uri = null, $get = null, $post = null, $cookie = null, $session = null, $server = null)
+	public function __construct ($uri = null, $method = null, $get = null, $post = null, $cookie = null, $session = null, $server = null)
 	{
+		// @todo replace the parameters of this constructor with a class, such as Gwilym_Request_Construct ?
+		
 		if ($uri !== null) {
 			$this->uriParser(new Gwilym_UriParser_Fixed('', $uri));
 		}
 
-		$this->_get = $get === null ? $_GET : $get;
-		$this->_post = $post === null ? $_POST : $post;
-		$this->_cookie = $cookie === null ? $_COOKIE : $cookie;
+		$this->post = new Gwilym_ArrayObject_ReadOnly($post === null ? $_POST : $post);
+		$this->get = new Gwilym_ArrayObject_ReadOnly($get === null ? $_GET : $get);
+		$this->cookie = new Gwilym_ArrayObject_ReadOnly($cookie === null ? $_COOKIE : $cookie);
+		$this->server = new Gwilym_ArrayObject_ReadOnly($server === null ? $_SERVER : $server);
 		$this->_session = $session;
-		$this->_server = $server === null ? $_SERVER : $server;
+		
+		if ($method === null) {
+			$this->_method = isset($this->server['REQUEST_METHOD']) ? strtoupper($this->server['REQUEST_METHOD']) : '';
+		} else {
+			$this->_method = strtoupper($method);
+		}		
 	}
 
 	/**
@@ -147,9 +158,9 @@ class Gwilym_Request
 	*
 	* @return string
 	*/
-	public function method ()
+	public function getMethod ()
 	{
-		return strtoupper($_SERVER['REQUEST_METHOD']);
+		return $this->_method;
 	}
 
 	/**
@@ -320,14 +331,14 @@ class Gwilym_Request
 		return isset($this->_session[$key]) ? $this->_session[$key] : null;
 	}
 
-	public function sessionId ()
+	public function getSessionId ()
 	{
 		$this->_startSession();
 		return session_id();
 	}
 
 	/** @var Gwilym_Response */
-	public function response ()
+	public function getResponse ()
 	{
 		if ($this->_response === null) {
 			$this->_response = new Gwilym_Response($this);
