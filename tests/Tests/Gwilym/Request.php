@@ -31,7 +31,7 @@ class TestController_Transfer_To extends Gwilym_Controller
 	public function action ()
 	{
 		Tests_Gwilym_Request::$testData = 3;
-		$this->view(new Gwilym_View_None);
+		$this->view(new Gwilym_View_None($this));
 	}
 }
 
@@ -144,7 +144,7 @@ class Tests_Gwilym_Request extends UnitTestCase
 	public function testRequestGuessesUriByDefault ()
 	{
 		$request = new Gwilym_Request_Test();
-		$parser = $request->uriParser();
+		$parser = $request->getUriParser();
 		$this->assertIsA($parser, 'Gwilym_UriParser_Guess');
 	}
 }
