@@ -12,7 +12,7 @@ abstract class Gwilym_Router_Standard extends Gwilym_Router
 		$item = ucfirst($item);
 	}
 
-	public function routeToUri (Gwilym_Route $route)
+	public function getUriForRoute (Gwilym_Route $route)
 	{
 		$uri = explode('_', $route->controller());
 		array_shift($uri);
