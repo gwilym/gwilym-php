@@ -32,7 +32,7 @@
 */
 class Gwilym_Router_Standard_Reverse extends Gwilym_Router_Standard
 {
-	public function requestToRoute (Gwilym_Request $request)
+	public function getRouteForRequest (Gwilym_Request $request)
 	{
 		$uri = $request->getUri();
 
