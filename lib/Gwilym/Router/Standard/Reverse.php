@@ -34,7 +34,7 @@ class Gwilym_Router_Standard_Reverse extends Gwilym_Router_Standard
 {
 	public function requestToRoute (Gwilym_Request $request)
 	{
-		$uri = $request->uri();
+		$uri = $request->getUri();
 
 		// anything after ? is unwanted and will be in $_GET anyway
 		list($uri) = explode('?', $uri, 2);

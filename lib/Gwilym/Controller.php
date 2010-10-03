@@ -87,13 +87,11 @@ abstract class Gwilym_Controller implements Gwilym_Controller_Interface
 	 */
 	public function view (Gwilym_View $view = null)
 	{
-		if (func_num_args())
-		{
+		if (func_num_args()) {
 			$this->_view = $view;
 		}
 
-		if ($this->_view === null)
-		{
+		if ($this->_view === null) {
 			$this->_view = new Gwilym_View_Php($this, $this->getDefaultViewPath());
 		}
 

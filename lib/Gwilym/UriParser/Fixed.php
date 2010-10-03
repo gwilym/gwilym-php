@@ -10,12 +10,9 @@ class Gwilym_UriParser_Fixed extends Gwilym_UriParser
 	{
 		$this->_base = $base;
 
-		if ($uri === null)
-		{
+		if ($uri === null) {
 			$this->_uri = substr($_SERVER['REQUEST_URI'], strlen($this->_base));
-		}
-		else
-		{
+		} else {
 			$this->_uri = $uri;
 		}
 
