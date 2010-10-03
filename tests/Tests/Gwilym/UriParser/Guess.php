@@ -5,13 +5,13 @@ class Tests_Gwilym_UriParser_Guess extends UnitTestCase
 	public function testRequestUri ()
 	{
 		$parser = new Gwilym_UriParser_Guess();
-		$this->assertEqual($_SERVER['REQUEST_URI'], $parser->requestUri());
+		$this->assertEqual($_SERVER['REQUEST_URI'], $parser->getRequestUri());
 	}
 
 	public function testRequestBaseDir ()
 	{
 		$parser = new Gwilym_UriParser_Guess();
-		$this->assertEqual(GWILYM_BASE_DIR, $parser->requestBaseDir());
+		$this->assertEqual(GWILYM_BASE_DIR, $parser->getRequestBaseDir());
 	}
 
 	public function testParseOnNotWindows ()
@@ -33,10 +33,8 @@ class Tests_Gwilym_UriParser_Guess extends UnitTestCase
 			return;
 		}
 
-		$parser = new Gwilym_UriParser_Guess();
-
 		$data = array();
-
+		
 		$data[] = array(
 			'inputRequest' => '/gwilym-php/alpha/beta',
 			'inputBase' => 'C:/httpd/www/gwilym-php',
@@ -69,13 +67,13 @@ class Tests_Gwilym_UriParser_Guess extends UnitTestCase
 			'parseUri' => '/',
 		);
 
-		foreach ($data as $test)
-		{
-			$parser->requestUri($test['inputRequest']);
-			$parser->requestBaseDir($test['inputBase']);
-			$this->assertEqual($test['parseBase'], $parser->base());
-			$this->assertEqual($test['parseDocroot'], $parser->docroot());
-			$this->assertEqual($test['parseUri'], $parser->uri());
+		foreach ($data as $test) {
+			$parser = new Gwilym_UriParser_Guess;
+			$parser->setRequestUri($test['inputRequest']);
+			$parser->setRequestBaseDir($test['inputBase']);
+			$this->assertEqual($test['parseBase'], $parser->getBase());
+			$this->assertEqual($test['parseDocroot'], $parser->getDocRoot());
+			$this->assertEqual($test['parseUri'], $parser->getUri());
 		}
 	}
 }

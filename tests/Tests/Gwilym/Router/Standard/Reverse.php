@@ -67,19 +67,19 @@ class Tests_Gwilym_Router_Standard_Reverse extends UnitTestCase
 				$route = new Gwilym_Route($request, $controller);
 			}
 
-			$this->assertEqual($this->router->routeToUri($route), $uri);
+			$this->assertEqual($this->router->getUriForRoute($route), $uri);
 
 		}
 	}
 
-	public function testRequestToRoute ()
+	public function testGetRouteForRequest ()
 	{
 		foreach ($this->_uris as $uri => $expected)
 		{
 			$request = new Gwilym_Request($uri);
 			$request->addRouter($this->router);
-			$request->uriParser(new Gwilym_UriParser_Fixed('', $uri));
-			$route = $this->router->requestToRoute($request);
+			$request->setUriParser(new Gwilym_UriParser_Fixed('', $uri));
+			$route = $this->router->getRouteForRequest($request);
 			$controller = $route->controller();
 			$this->assertEqual($controller, $expected[0], "uri '$uri' routed to $controller, should be {$expected[0]}");
 
