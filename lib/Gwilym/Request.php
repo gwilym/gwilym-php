@@ -75,26 +75,38 @@ class Gwilym_Request
 
 	/**
 	* @param string $uri URI for this request, or leave as null to determine based on user-agent-supplied data
+	* @param string $method specify the request method of this request, or leave as null to determine based on server api
 	* @param array $get GET fields for this request, or leave as null to use user-agent-supplied data
 	* @param array $post POST fields for this request, or leave as null to use user-agent-supplied data
 	* @param array $cookie COOKIE fields for this request, or leave as null to use user-agent-supplied data
-	* @param array $session SESSION fields for this request (supplying this will prevent real session interaction), or leave as null to use a real PHP session
 	* @param array $server SERVER fields for this request, or leave as null to use user-agent- & server-api-supplied data
+	* @param array $session interactive SESSION data for this request - supplying this will prevent real session interaction, or leave as null to use a real PHP session
 	* @return Gwilym_Request
 	*/
-	public function __construct ($uri = null, $method = null, $get = null, $post = null, $cookie = null, $session = null, $server = null)
+	public function __construct ($uri = null, $method = null, $get = null, $post = null, $cookie = null, $server = null, $session = null)
 	{
 		// @todo replace the parameters of this constructor with a class, such as Gwilym_Request_Construct ?
 		
 		if ($uri !== null) {
-			$this->uriParser(new Gwilym_UriParser_Fixed('', $uri));
+			// if a specific uri is passed in for this request (usually for testing or perhaps for
+			// configurable slug urls) then set the uri parser to fixed
+			$this->setUriParser(new Gwilym_UriParser_Fixed('', $uri));
 		}
 
+		// create read-only copies of either provided GPCS data, or global data at time of instanciation
+		// this helps to avoid issues where other scripts may modify the original data
+		// note: exceptions will be thrown by Gwilym_ArrayObject_ReadOnly if anything attempts to modify these
 		$this->post = new Gwilym_ArrayObject_ReadOnly($post === null ? $_POST : $post);
 		$this->get = new Gwilym_ArrayObject_ReadOnly($get === null ? $_GET : $get);
 		$this->cookie = new Gwilym_ArrayObject_ReadOnly($cookie === null ? $_COOKIE : $cookie);
 		$this->server = new Gwilym_ArrayObject_ReadOnly($server === null ? $_SERVER : $server);
-		$this->_session = $session;
+		
+		if ($session === null) {
+			@session_start();
+			$this->session = $_SESSION;
+		} else {
+			$this->session = $session;
+		}
 		
 		if ($method === null) {
 			$this->_method = isset($this->server['REQUEST_METHOD']) ? strtoupper($this->server['REQUEST_METHOD']) : '';
@@ -104,23 +116,30 @@ class Gwilym_Request
 	}
 
 	/**
-	* Set or get the UriParser to use for this Request
+	* Get the UriParser being used for this Request. The default is Gwilym_UriParser_Guess.
 	*
 	* @param Gwilym_UriParser $uriParser
 	* @return Gwilym_UriParser
 	*/
-	public function getUriParser (Gwilym_UriParser $uriParser = null)
+	public function getUriParser ()
 	{
-		if ($uriParser !== null) {
-			$this->_uriParser = $uriParser;
-			return $this;
-		}
-
 		if ($this->_uriParser === null) {
 			$this->_uriParser = new Gwilym_UriParser_Guess;
 		}
 
 		return $this->_uriParser;
+	}
+
+	/**
+	* Set the UriParser to use for this Request
+	*
+	* @param Gwilym_UriParser $uriParser
+	* @return Gwilym_UriParser
+	*/
+	public function setUriParser (Gwilym_UriParser $uriParser)
+	{
+		$this->_uriParser = $uriParser;
+		return $this;
 	}
 
 	/**
@@ -183,12 +202,12 @@ class Gwilym_Request
 				if ($transfer) {
 					return $transfer->follow();
 				} else {
-					foreach ($this->_routers as $index => /** @var Gwilym_Router */$router) {
+					foreach ($this->_routers as $index => /** @var Gwilym_Router $router */$router) {
 						if (is_string($router)) {
 							$router = $this->_routers[$index] = new $router;
 						}
 						$this->_currentRouter = $router;
-						$result = $router->route($this);
+						$result = $router->routeRequest($this);
 						if ($result !== false) {
 							// routing was successful
 							return true;
@@ -199,18 +218,18 @@ class Gwilym_Request
 			} catch (Gwilym_Request_Exception_Transfer $exception) {
 				$transfer = null;
 
-				if (class_exists($exception->to) && Gwilym_Reflection::isClassInstanciable($exception->to)) {
+				if (class_exists($exception->to()) && Gwilym_Reflection::isClassInstanciable($exception->to())) {
 					// explicit transfer to named class
 					$transfer = $this->route($exception->to(), $exception->args());
 				} else {
 					// the specified transfer should be routed like a uri
-					$previousParser = $this->uriParser();
+					$previousParser = $this->getUriParser();
 					$fixedParser = new Gwilym_UriParser_Fixed(
-						$previousParser->base(),
+						$previousParser->getBase(),
 						$exception->to(),
-						$previousParser->docroot()
+						$previousParser->getDocRoot()
 					);
-					$this->uriParser($fixedParser);
+					$this->setUriParser($fixedParser);
 				}
 			}
 		}
@@ -260,8 +279,8 @@ class Gwilym_Request
 				$router = $this->_routers[$index] = new $router;
 			}
 
-			if ($uri = $router->routeToUri($route)) {
-				return $this->uriParser()->base() . $uri;
+			if ($uri = $router->getUriForRoute($route)) {
+				return $this->getUriParser()->getBase() . $uri;
 			}
 		}
 		return false;
