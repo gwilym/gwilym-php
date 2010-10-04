@@ -33,6 +33,11 @@ abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 	{
 		$this->_states = $this->_getStates();
 	}
+	
+	public function getStarted ()
+	{
+		return $this->_started;
+	}
 
 	/** @var starts the finite state machine, if not already started */
 	public function start ()
@@ -44,7 +49,7 @@ abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 		$this->_started = true;
 		$this->_state = null;
 
-		while ($this->step()) {
+		while ($this->_step()) {
 			// just loop until stopped
 		}
 
@@ -105,7 +110,7 @@ abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 	*
 	* @return string the new current state name, that is, the state that was just executed by this call to step()
 	*/
-	public function step ()
+	protected function _step ()
 	{
 		if (!$this->_started) {
 			return;
