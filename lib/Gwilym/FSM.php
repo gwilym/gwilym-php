@@ -34,11 +34,6 @@ abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 		$this->_states = $this->_getStates();
 	}
 	
-	public function getStarted ()
-	{
-		return $this->_started;
-	}
-
 	/** @var starts the finite state machine, if not already started */
 	public function start ()
 	{
@@ -133,9 +128,15 @@ abstract class Gwilym_FSM implements Gwilym_FSM_Interface
 	}
 
 	/** @return bool true if started otherwise false */
-	public function started ()
+	public function getStarted ()
 	{
 		return $this->_started;
+	}
+	
+	/** @return string the fsm's current state */
+	public function getState ()
+	{
+		return $this->_state;
 	}
 
 	/**
