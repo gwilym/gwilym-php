@@ -7,6 +7,7 @@ class Tests_Gwilym_FSM extends UnitTestCase
         $fsm = new Tests_Gwilym_FSM_BasicFsmTest;
         $fsm->setPayload('0')
             ->start();
+        $this->assertFalse($fsm->getStarted());
         $this->assertEqual('0123', $fsm->getPayload());
     }
     
@@ -15,6 +16,7 @@ class Tests_Gwilym_FSM extends UnitTestCase
         $fsm = new Tests_Gwilym_FSM_StoppingFsmTest;
         $fsm->setPayload('0')
             ->start();
+        $this->assertFalse($fsm->getStarted());
         $this->assertEqual('01', $fsm->getPayload());
     }
     
@@ -24,7 +26,22 @@ class Tests_Gwilym_FSM extends UnitTestCase
         $fsm->setFrom(10)
             ->setTo(20)
             ->start();
+        $this->assertFalse($fsm->getStarted());
         $this->assertEqual(20, $fsm->getCounter());
         $this->assertEqual(10, $fsm->getIterations());
+    }
+    
+    public function testPausableFsm ()
+    {
+        $fsm = new Tests_Gwilym_Fsm_PausableTest;
+        $fsm->resume();
+        $this->assertTrue($fsm->getPaused());
+        $this->assertTrue($fsm->getStarted());
+        $fsm->resume();
+        $this->assertTrue($fsm->getPaused());
+        $this->assertTrue($fsm->getStarted());
+        $fsm->resume();
+        $this->assertFalse($fsm->getPaused());
+        $this->assertFalse($fsm->getStarted());
     }
 }
