@@ -3,3 +3,5 @@ this should be able to be dropped anywhere and just start working though you may
 - rename "htaccess.example" to .htaccess
 - adjust RewriteBase in .htaccess to suit your setup
 - create directory /app/var/ and make it writable
+
+this package is licensed under the MIT license, as per http://www.opensource.org/licenses/mit-license.html, which can be read in the accompanying LICENSE file
