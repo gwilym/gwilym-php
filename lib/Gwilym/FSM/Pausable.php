@@ -11,6 +11,11 @@ abstract class Gwilym_FSM_Pausable extends Gwilym_FSM
 {
 	protected $_paused = false;
 
+	public function getPaused ()
+	{
+		return $this->_paused;
+	}
+	
 	public function pause ()
 	{
 		$this->_paused = true;
@@ -26,7 +31,7 @@ abstract class Gwilym_FSM_Pausable extends Gwilym_FSM
 		$this->_paused = false;
 
 		if ($this->_started) {
-			while ($this->step()) {
+			while ($this->_step()) {
 				// just loop until stopped
 			}
 		}
@@ -34,13 +39,13 @@ abstract class Gwilym_FSM_Pausable extends Gwilym_FSM
 		$this->_stopping();
 	}
 
-	public function step ()
+	protected function _step ()
 	{
 		if ($this->_paused) {
 			return;
 		}
 
-		return parent::step();
+		return parent::_step();
 	}
 
 	public function stop ()
