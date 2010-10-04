@@ -20,6 +20,7 @@ class AllTests extends TestSuite {
 		$this->TestSuite('All tests');
 		$this->addTestClass('Tests_Gwilym_ArrayObject_FirstRead');
 		$this->addTestClass('Tests_Gwilym_ArrayObject_ReadOnly');
+		$this->addTestClass('Tests_Gwilym_Autoloader');
 		$this->addTestClass('Tests_Gwilym_Event');
 		$this->addTestClass('Tests_Gwilym_KeyStore_File');
 		$this->addTestClass('Tests_Gwilym_KeyStore_Mongodb');
