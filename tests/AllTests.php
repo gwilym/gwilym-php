@@ -18,6 +18,8 @@ require_once dirname(__FILE__) . '/simpletest/collector.php';
 class AllTests extends TestSuite {
 	function AllTests() {
 		$this->TestSuite('All tests');
+		$this->addTestClass('Tests_Gwilym_ArrayObject_FirstRead');
+		$this->addTestClass('Tests_Gwilym_ArrayObject_ReadOnly');
 		$this->addTestClass('Tests_Gwilym_Event');
 		$this->addTestClass('Tests_Gwilym_KeyStore_File');
 		$this->addTestClass('Tests_Gwilym_KeyStore_Mongodb');
@@ -34,6 +36,7 @@ $suite = new AllTests();
 
 if (@$_GET['coverage']) {
 	$filter = PHP_CodeCoverage_Filter::getInstance();
+	$filter->addDirectoryToWhitelist(dirname(dirname(__FILE__)) . '/lib/Gwilym');
 	$filter->addDirectoryToBlacklist(dirname(__FILE__));
 
 	$coverage = new PHP_CodeCoverage();
@@ -49,5 +52,9 @@ if (@$_GET['coverage']) {
 	mkdir($report);
 
 	$writer = new PHP_CodeCoverage_Report_HTML;
+	$writer->process($coverage, $report);
+
+	$report = dirname(__FILE__) . '/coverage/current';
+	@mkdir($report);
 	$writer->process($coverage, $report);
 }
