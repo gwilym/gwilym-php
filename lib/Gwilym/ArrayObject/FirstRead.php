@@ -42,6 +42,11 @@ class Gwilym_ArrayObject_FirstRead extends Gwilym_ArrayObject_TrackChanged
 		$this->_setAccessed();
 		return parent::count();
 	}
+	
+	public function getAccessed ()
+	{
+		return $this->_accessed;
+	}
 
 	public function getArrayCopy ()
 	{

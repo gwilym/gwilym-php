@@ -3,7 +3,7 @@
 /**
 * Abstracts access to PHP's sessions functionality, allowing for lazy-starting of session.
 */
-class Gwilym_Session extends Gwilym_ArrayObject_ByReference
+class Gwilym_Session extends Gwilym_ArrayObject_FirstRead
 {
 	/** @var string */
 	protected $_name;
