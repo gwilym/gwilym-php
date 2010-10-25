@@ -15,7 +15,7 @@ class Gwilym_View_Twig extends Gwilym_View
 	
 	protected function _getContext ()
 	{
-		return $this->data();
+		return $this->getData();
 	}
 
 	public function __construct (Gwilym_Controller $controller, $file, $paths = array())

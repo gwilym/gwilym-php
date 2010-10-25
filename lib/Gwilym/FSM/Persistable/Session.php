@@ -42,6 +42,20 @@ abstract class Gwilym_FSM_Persistable_Session extends Gwilym_FSM_Persistable
 	}
 
 	/**
+	* Deletes any data stored for this persistable FSM
+	*
+	* @return void
+	*/
+	public function delete ()
+	{
+		$key = 'gwilym,fsm,' . $this->name . ',' . $this->id();
+		// force a session start
+		$this->_request->session($key);
+		// @todo need to fix this hack; get/set works for session() but can't delete
+		unset($_SESSION[$key]);
+	}
+
+	/**
 	* Load the state and data information of an existing FSM into this instance
 	*
 	* @param string $id

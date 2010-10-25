@@ -52,7 +52,7 @@ abstract class Gwilym_Controller implements Gwilym_Controller_Interface
 	*
 	* @return Gwilym_Request
 	*/
-	public function request ()
+	public function getRequest ()
 	{
 		return $this->_request;
 	}
@@ -62,7 +62,7 @@ abstract class Gwilym_Controller implements Gwilym_Controller_Interface
 	*
 	* @return Gwilym_Response
 	*/
-	public function response ()
+	public function getResponse ()
 	{
 		return $this->_request->response();
 	}
@@ -85,17 +85,19 @@ abstract class Gwilym_Controller implements Gwilym_Controller_Interface
 	 *
 	 * @return Gwilym_View
 	 */
-	public function view (Gwilym_View $view = null)
+	public function getView (Gwilym_View $view = null)
 	{
-		if (func_num_args()) {
-			$this->_view = $view;
-		}
-
-		if ($this->_view === null) {
-			$this->_view = new Gwilym_View_Php($this, $this->getDefaultViewPath());
+		if ($this->_view === null)
+		{
+			$this->_view = new Gwilym_View_Php($this->getDefaultViewPath());
 		}
 
 		return $this->_view;
+	}
+	
+	public function setView (Gwilym_View $view)
+	{
+		$this->_view = $view;
 	}
 
 	/**
@@ -118,7 +120,7 @@ abstract class Gwilym_Controller implements Gwilym_Controller_Interface
 	{
 	}
 	
-	public function data ()
+	public function getData ()
 	{
 		return $this->_data;
 	}

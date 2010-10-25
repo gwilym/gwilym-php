@@ -22,8 +22,8 @@ abstract class Gwilym_View
 		$this->_controller = $controller;
 	}
 	
-	public function data ()
+	public function getData ()
 	{
-		return $this->_controller->data();
+		return $this->_controller->getData();
 	}
 }

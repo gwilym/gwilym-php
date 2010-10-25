@@ -37,7 +37,6 @@ class Gwilym_FSM_Persister_Session implements Gwilym_FSM_Persister_Interface
 	
 	public function delete (Gwilym_FSM $fsm)
 	{
-		$this->_request->session('');
 		unset($_SESSION[$this->_getKey($fsm)]);
 	}
 	

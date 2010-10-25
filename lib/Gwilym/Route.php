@@ -55,7 +55,7 @@ class Gwilym_Route
 			$controller->after();
 		}
 
-		$controller->view()
+		$controller->getView()
 			->display();
 	}
 
