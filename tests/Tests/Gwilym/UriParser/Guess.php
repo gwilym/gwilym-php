@@ -11,7 +11,7 @@ class Tests_Gwilym_UriParser_Guess extends UnitTestCase
 	public function testRequestBaseDir ()
 	{
 		$parser = new Gwilym_UriParser_Guess();
-		$this->assertEqual(GWILYM_BASE_DIR, $parser->getRequestBaseDir());
+		$this->assertEqual(GWILYM_PUBLIC_DIR, $parser->getRequestBaseDir());
 	}
 
 	public function testParseOnNotWindows ()
