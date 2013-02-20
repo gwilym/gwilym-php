@@ -1,3 +1,5 @@
+Note: This is largely incomplete and obsolete, it's mainly here for posterity as some proprietary code was spawned from these beginnings. Code which may later be open sourced.
+
 this should be able to be dropped anywhere and just start working though you may need to do the following (assuming apache):
 
 - rename "htaccess.example" to .htaccess
